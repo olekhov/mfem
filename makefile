@@ -123,10 +123,10 @@ export VERBOSE
 
 $(call mfem-info, MAKECMDGOALS = $(MAKECMDGOALS))
 $(call mfem-info, MAKEFLAGS    = $(MAKEFLAGS))
-$(call mfem-info, MFEM_DIR  = $(MFEM_DIR))
-$(call mfem-info, BUILD_DIR = $(BUILD_DIR))
-$(call mfem-info, SRC       = $(SRC))
-$(call mfem-info, BLD       = $(BLD))
+$(call mfem-info, MFEM_DIR     = $(MFEM_DIR))
+$(call mfem-info, BUILD_DIR    = $(BUILD_DIR))
+$(call mfem-info, SRC          = $(SRC))
+$(call mfem-info, BLD          = $(BLD))
 
 # Include $(CONFIG_MK) unless some of the $(SKIP_INCLUDE_TARGETS) are given
 SKIP_INCLUDE_TARGETS = help config clean distclean serial parallel debug pdebug\
@@ -187,7 +187,7 @@ endif
 
 # List of MFEM dependencies, processed below
 MFEM_DEPENDENCIES = LIBUNWIND SIDRE LAPACK OPENMP SUNDIALS MESQUITE SUITESPARSE\
- SUPERLU STRUMPACK GECKO GNUTLS NETCDF PETSC MPFR
+ SUPERLU STRUMPACK GECKO GNUTLS NETCDF PETSC MPFR OCCA
 
 # Macro for adding dependencies
 define mfem_add_dependency
@@ -215,8 +215,13 @@ MFEM_DEFINES = MFEM_VERSION MFEM_USE_MPI MFEM_USE_METIS_5 MFEM_DEBUG\
  MFEM_USE_GZSTREAM MFEM_USE_LIBUNWIND MFEM_USE_LAPACK MFEM_THREAD_SAFE\
  MFEM_USE_OPENMP MFEM_USE_MEMALLOC MFEM_TIMER_TYPE MFEM_USE_SUNDIALS\
  MFEM_USE_MESQUITE MFEM_USE_SUITESPARSE MFEM_USE_GECKO MFEM_USE_SUPERLU\
+<<<<<<< HEAD
  MFEM_USE_STRUMPACK MFEM_USE_GNUTLS MFEM_USE_NETCDF MFEM_USE_PETSC\
  MFEM_USE_MPFR MFEM_USE_SIDRE
+=======
+ MFEM_USE_GNUTLS MFEM_USE_NETCDF MFEM_USE_PETSC MFEM_USE_MPFR MFEM_USE_SIDRE\
+ MFEM_USE_OCCA
+>>>>>>> 9930187... [OCCA] Added base changes to core classes to hook up with OCCA (still in prototype, compiles but doesn't work)
 
 # List of makefile variables that will be written to config.mk:
 MFEM_CONFIG_VARS = MFEM_CXX MFEM_CPPFLAGS MFEM_CXXFLAGS MFEM_INC_DIR\
@@ -427,6 +432,7 @@ status info:
 	$(info MFEM_USE_PETSC       = $(MFEM_USE_PETSC))
 	$(info MFEM_USE_MPFR        = $(MFEM_USE_MPFR))
 	$(info MFEM_USE_SIDRE       = $(MFEM_USE_SIDRE))
+	$(info MFEM_USE_OCCA        = $(MFEM_USE_OCCA))
 	$(info MFEM_CXX             = $(value MFEM_CXX))
 	$(info MFEM_CPPFLAGS        = $(value MFEM_CPPFLAGS))
 	$(info MFEM_CXXFLAGS        = $(value MFEM_CXXFLAGS))
