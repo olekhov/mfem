@@ -215,13 +215,8 @@ MFEM_DEFINES = MFEM_VERSION MFEM_USE_MPI MFEM_USE_METIS_5 MFEM_DEBUG\
  MFEM_USE_GZSTREAM MFEM_USE_LIBUNWIND MFEM_USE_LAPACK MFEM_THREAD_SAFE\
  MFEM_USE_OPENMP MFEM_USE_MEMALLOC MFEM_TIMER_TYPE MFEM_USE_SUNDIALS\
  MFEM_USE_MESQUITE MFEM_USE_SUITESPARSE MFEM_USE_GECKO MFEM_USE_SUPERLU\
-<<<<<<< HEAD
  MFEM_USE_STRUMPACK MFEM_USE_GNUTLS MFEM_USE_NETCDF MFEM_USE_PETSC\
- MFEM_USE_MPFR MFEM_USE_SIDRE
-=======
- MFEM_USE_GNUTLS MFEM_USE_NETCDF MFEM_USE_PETSC MFEM_USE_MPFR MFEM_USE_SIDRE\
- MFEM_USE_OCCA
->>>>>>> 9930187... [OCCA] Added base changes to core classes to hook up with OCCA (still in prototype, compiles but doesn't work)
+ MFEM_USE_MPFR MFEM_USE_SIDRE MFEM_USE_OCCA
 
 # List of makefile variables that will be written to config.mk:
 MFEM_CONFIG_VARS = MFEM_CXX MFEM_CPPFLAGS MFEM_CXXFLAGS MFEM_INC_DIR\
@@ -461,3 +456,19 @@ style:
 # Print the contents of a makefile variable, e.g.: 'make print-MFEM_LIBS'.
 print-%: ; @printf "%s:\n" $*
 	@printf "%s\n" $($*)
+
+#---[ OCCA ]----------------------------
+OCCA_CACHE_DIR     ?= ${HOME}/.occa
+OCCA_LIB_CACHE_DIR := $(OCCA_CACHE_DIR)/libraries
+
+OKL_KERNELS        := $(realpath $(shell find $(MFEM_REAL_DIR) -type f -name '*.okl'))
+OKL_CACHED_KERNELS := $(subst kernels/,,$(subst $(MFEM_REAL_DIR)/,$(OCCA_LIB_CACHE_DIR)/mfem/,$(OKL_KERNELS)))
+
+# Cache kernels in the OCCA cache directory
+.PHONY: cache-kernels
+cache-kernels: $(OKL_CACHED_KERNELS)
+
+$(OCCA_LIB_CACHE_DIR)/mfem/fem/%.okl: $(MFEM_REAL_DIR)/fem/kernels/%.okl
+	@echo "Caching: $(subst $(MFEM_REAL_DIR)/,,$<)"
+	@occa cache -l mfem/$(subst $(OCCA_LIB_CACHE_DIR)/mfem/,,$(dir $@)) $<
+#=======================================
