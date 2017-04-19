@@ -81,6 +81,7 @@ MFEM_USE_PETSC       = NO
 MFEM_USE_MPFR        = NO
 MFEM_USE_SIDRE       = NO
 MFEM_USE_OCCA        = NO
+MFEM_USE_ACROTENSOR  = NO
 
 LIBUNWIND_OPT = -g
 LIBUNWIND_LIB = $(if $(NOTMAC),-lunwind -ldl,)
@@ -225,6 +226,13 @@ ifeq ($(MFEM_USE_OCCA),YES)
   endif
   OCCA_OPT := -I$(OCCA_DIR)/include
   OCCA_LIB := -L$(OCCA_DIR)/lib -locca
+endif
+
+#Acrotensor library configs
+ifeq ($(MFEM_USE_OCCA),YES)
+   ACROTENSOR_DIR = @MFEM_DIR@/../acrotensor
+   ACROTENSOR_OPT = -I$(ACROTENSOR_DIR)/inc
+   ACROTENSOR_LIB = -L$(ACROTENSOR_DIR)/lib -lacrotensor -lcuda -lnvrtc
 endif
 
 # If YES, enable some informational messages
