@@ -210,6 +210,10 @@ namespace mfem {
     return fespace->GetTrueVSize();
   }
 
+  const FiniteElementCollection* OccaFiniteElementSpace::FEColl() const {
+    return fespace->FEColl();
+  }
+
   const int* OccaFiniteElementSpace::GetElementDofMap() const {
     return elementDofMap;
   }

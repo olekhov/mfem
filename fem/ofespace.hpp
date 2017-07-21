@@ -70,6 +70,8 @@ namespace mfem {
     int GetGlobalVSize() const;
     int GetGlobalTrueVSize() const;
 
+    const FiniteElementCollection* FEColl() const;
+
     const int* GetElementDofMap() const;
     const int* GetElementDofMapInverse() const;
 
