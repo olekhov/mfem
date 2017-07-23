@@ -27,6 +27,18 @@ kernel void ExtractSubVector(const int entries,
   }
 }
 
+kernel void SetSubVector(const int entries,
+                         const int * restrict indices,
+                         const double * restrict in,
+                         double * restrict out) {
+
+  for (int i = 0; i < entries; ++i; tile(TILESIZE)) {
+    if (i < entries) {
+      out[indices[i]] = in[i];
+    }
+  }
+}
+
 kernel void MapSubVector(const int entries,
                          const int * restrict indices,
                          const double * restrict in,

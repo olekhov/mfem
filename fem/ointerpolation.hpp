@@ -29,7 +29,7 @@ namespace mfem {
   protected:
     int entries;
     occa::array<int> trueIndices;
-    occa::kernel mapKernel;
+    occa::kernel multOp, multTransposeOp;
 
   public:
     OccaRestrictionOperator(occa::device device,
@@ -37,6 +37,7 @@ namespace mfem {
                             occa::array<int> indices);
 
     virtual void Mult(const OccaVector &x, OccaVector &y) const;
+    virtual void MultTranspose(const OccaVector &x, OccaVector &y) const;
   };
 
   class OccaProlongationOperator : public Operator {

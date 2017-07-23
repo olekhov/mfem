@@ -57,13 +57,22 @@ namespace mfem {
     entries     = indices.size() / 2;
     trueIndices = indices;
 
-    mapKernel = device.buildKernel("occa://mfem/linalg/mappings.okl",
-                                   "ExtractSubVector",
-                                   "defines: { TILESIZE: 256 }");
+    multOp = device.buildKernel("occa://mfem/linalg/mappings.okl",
+                                "ExtractSubVector",
+                                "defines: { TILESIZE: 256 }");
+
+    multTransposeOp = device.buildKernel("occa://mfem/linalg/mappings.okl",
+                                         "SetSubVector",
+                                         "defines: { TILESIZE: 256 }");
   }
 
   void OccaRestrictionOperator::Mult(const OccaVector &x, OccaVector &y) const {
-    mapKernel(entries, trueIndices, x, y);
+    multOp(entries, trueIndices, x, y);
+  }
+
+  void OccaRestrictionOperator::MultTranspose(const OccaVector &x, OccaVector &y) const {
+    y = 0;
+    multTransposeOp(entries, trueIndices, x, y);
   }
 
   OccaProlongationOperator::OccaProlongationOperator(OccaSparseMatrix &multOp_,

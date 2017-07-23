@@ -309,10 +309,26 @@ typedef TCGSolver<Vector> CGSolver;
 /// Conjugate gradient method. (tolerances are squared)
 template <class TVector>
 void TCG(const Operator &A, const TVector &b, TVector &x,
-        int print_iter = 0, int max_num_iter = 1000,
-        double RTOLERANCE = 1e-12, double ATOLERANCE = 1e-24)
+         int print_iter = 0, int max_num_iter = 1000,
+         double RTOLERANCE = 1e-12, double ATOLERANCE = 1e-24)
 {
    TCGSolver<TVector> cg;
+   cg.SetPrintLevel(print_iter);
+   cg.SetMaxIter(max_num_iter);
+   cg.SetRelTol(sqrt(RTOLERANCE));
+   cg.SetAbsTol(sqrt(ATOLERANCE));
+   cg.SetOperator(A);
+   cg.Mult(b, x);
+}
+
+/// Conjugate gradient method. (tolerances are squared)
+template <class TVector>
+void TCG(MPI_Comm comm,
+         const Operator &A, const TVector &b, TVector &x,
+         int print_iter = 0, int max_num_iter = 1000,
+         double RTOLERANCE = 1e-12, double ATOLERANCE = 1e-24)
+{
+   TCGSolver<TVector> cg(comm);
    cg.SetPrintLevel(print_iter);
    cg.SetMaxIter(max_num_iter);
    cg.SetRelTol(sqrt(RTOLERANCE));
@@ -337,22 +353,61 @@ void TPCG(const Operator &A, Solver &B, const TVector &b, TVector &x,
    pcg.Mult(b, x);
 }
 
+/// Preconditioned conjugate gradient method. (tolerances are squared)
+template <class TVector>
+void TPCG(MPI_Comm comm,
+          const Operator &A, Solver &B, const TVector &b, TVector &x,
+          int print_iter = 0, int max_num_iter = 1000,
+          double RTOLERANCE = 1e-12, double ATOLERANCE = 1e-24)
+{
+  TCGSolver<TVector> pcg(comm);
+   pcg.SetPrintLevel(print_iter);
+   pcg.SetMaxIter(max_num_iter);
+   pcg.SetRelTol(sqrt(RTOLERANCE));
+   pcg.SetAbsTol(sqrt(ATOLERANCE));
+   pcg.SetOperator(A);
+   pcg.SetPreconditioner(B);
+   pcg.Mult(b, x);
+}
+
 inline void CG(const Operator &A, const Vector &b, Vector &x,
-        int print_iter = 0, int max_num_iter = 1000,
-        double RTOLERANCE = 1e-12, double ATOLERANCE = 1e-24)
+               int print_iter = 0, int max_num_iter = 1000,
+               double RTOLERANCE = 1e-12, double ATOLERANCE = 1e-24)
 {
   TCG<Vector>(A, b, x,
               print_iter, max_num_iter,
               RTOLERANCE, ATOLERANCE);
 }
 
-inline void PCG(const Operator &A, Solver &B, const Vector &b, Vector &x,
-        int print_iter = 0, int max_num_iter = 1000,
-        double RTOLERANCE = 1e-12, double ATOLERANCE = 1e-24)
+inline void CG(MPI_Comm comm,
+               const Operator &A, const Vector &b, Vector &x,
+               int print_iter = 0, int max_num_iter = 1000,
+               double RTOLERANCE = 1e-12, double ATOLERANCE = 1e-24)
 {
-  TPCG<Vector>(A, B, b, x,
+  TCG<Vector>(comm,
+              A, b, x,
               print_iter, max_num_iter,
               RTOLERANCE, ATOLERANCE);
+}
+
+inline void PCG(const Operator &A, Solver &B, const Vector &b, Vector &x,
+                int print_iter = 0, int max_num_iter = 1000,
+                double RTOLERANCE = 1e-12, double ATOLERANCE = 1e-24)
+{
+  TPCG<Vector>(A, B, b, x,
+               print_iter, max_num_iter,
+               RTOLERANCE, ATOLERANCE);
+}
+
+inline void PCG(MPI_Comm comm,
+                const Operator &A, Solver &B, const Vector &b, Vector &x,
+                int print_iter = 0, int max_num_iter = 1000,
+                double RTOLERANCE = 1e-12, double ATOLERANCE = 1e-24)
+{
+  TPCG<Vector>(comm,
+               A, B, b, x,
+               print_iter, max_num_iter,
+               RTOLERANCE, ATOLERANCE);
 }
 
 /// GMRES method
