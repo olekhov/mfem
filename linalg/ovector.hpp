@@ -179,24 +179,32 @@ namespace mfem
     void GetSubVector(const Array<int> &dofs, double *elem_data) const;
     void GetSubVector(const Array<int> &dofs, OccaVector &elemvect) const;
     void GetSubVector(occa::memory dofs, OccaVector &elemvect) const;
+    void GetSubVector(occa::memory dofs, OccaVector &elemvect, const int entries) const;
 
     /// Set the entries listed in `dofs` to the given `value`.
     void SetSubVector(const Array<int> &dofs, const Vector &elemvect);
     void SetSubVector(const Array<int> &dofs, double *elem_data);
     void SetSubVector(const Array<int> &dofs, const OccaVector &elemvect);
     void SetSubVector(occa::memory dofs, const OccaVector &elemvect);
+    void SetSubVector(occa::memory dofs, const OccaVector &elemvect, const int entries);
+
     void SetSubVector(const Array<int> &dofs, const double value);
+    void SetSubVector(occa::memory dofs, const double value);
+    void SetSubVector(occa::memory dofs, const double value, const int entries);
 
     /// Add (element) subvector to the vector.
     void AddElementVector(const Array<int> &dofs, const Vector &elemvect);
     void AddElementVector(const Array<int> &dofs, double *elem_data);
     void AddElementVector(const Array<int> &dofs, const OccaVector &elemvect);
     void AddElementVector(occa::memory dofs, const OccaVector &elemvect);
+    void AddElementVector(occa::memory dofs, const OccaVector &elemvect, const int entries);
 
     void AddElementVector(const Array<int> &dofs, const double a, const Vector &elemvect);
     void AddElementVector(const Array<int> &dofs, const double a, double *elem_data);
     void AddElementVector(const Array<int> &dofs, const double a, const OccaVector &elemvect);
     void AddElementVector(occa::memory dofs, const double a, const OccaVector &elemvect);
+    void AddElementVector(occa::memory dofs, const double a,
+                          const OccaVector &elemvect, const int entries);
 
     /// Set all vector entries NOT in the 'dofs' array to the given 'val'.
     void SetSubVectorComplement(const Array<int> &dofs, const double val);

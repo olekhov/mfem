@@ -170,6 +170,14 @@ namespace mfem {
     return fespace;
   }
 
+  bool OccaFiniteElementSpace::isDistributed() const {
+#ifndef MFEM_USE_MPI
+    return false;
+#else
+    return dynamic_cast<ParMesh*>(fespace->GetMesh());
+#endif
+  }
+
   int OccaFiniteElementSpace::GetGlobalDofs() const {
     return globalDofs;
   }

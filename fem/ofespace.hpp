@@ -61,6 +61,8 @@ namespace mfem {
     Mesh* GetMesh();
     FiniteElementSpace* GetFESpace();
 
+    bool isDistributed() const;
+
     int GetGlobalDofs() const;
     int GetLocalDofs() const;
     int GetVDim() const;

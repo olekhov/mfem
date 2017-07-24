@@ -57,7 +57,6 @@ namespace mfem {
     void SetGridFunction(GridFunction &gf);
 
     void GetTrueDofs(OccaVector &v) const;
-
     void SetFromTrueDofs(const OccaVector &v);
 
     FiniteElementSpace* GetFESpace();
@@ -65,6 +64,8 @@ namespace mfem {
 
     void ToQuad(OccaIntegrator &integ,
                 OccaVector &quadValues);
+
+    void Distribute(const OccaVector &v);
   };
 };
 

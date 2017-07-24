@@ -311,6 +311,12 @@ namespace mfem {
 
   void OccaVector::GetSubVector(occa::memory dofs,
                                 OccaVector &elemvect) const {
+    GetSubVector(dofs, elemvect, dofs.size<int>());
+  }
+
+  void OccaVector::GetSubVector(occa::memory dofs,
+                                OccaVector &elemvect,
+                                const int entries) const {
     static occa::kernelBuilder builder =
       makeCustomBuilder("vector_get_subvector",
                         "const int dof_i = v2[i];"
@@ -320,14 +326,12 @@ namespace mfem {
     occa::device dev = data.getDevice();
     occa::kernel kernel = builder.build(dev);
 
-    const int dofCount = dofs.size<int>();
-    elemvect.SetSize(dev, dofCount);
+    elemvect.SetSize(dev, entries);
 
-    kernel(dofCount, elemvect.data, data, dofs);
+    kernel(entries, elemvect.data, data, dofs);
   }
 
   /// Set the entries listed in `dofs` to the given `value`.
-
   void OccaVector::SetSubVector(const Array<int> &dofs,
                                 const Vector &elemvect) {
 
@@ -361,6 +365,12 @@ namespace mfem {
 
   void OccaVector::SetSubVector(occa::memory dofs,
                                 const OccaVector &elemvect) {
+    SetSubVector(dofs, elemvect, dofs.size<int>());
+  }
+
+  void OccaVector::SetSubVector(occa::memory dofs,
+                                const OccaVector &elemvect,
+                                const int entries) {
     static occa::kernelBuilder builder =
       makeCustomBuilder("vector_set_subvector",
                         "const int dof_i = v2[i];"
@@ -371,29 +381,42 @@ namespace mfem {
     occa::device dev = data.getDevice();
     occa::kernel kernel = builder.build(dev);
 
-    const int dofCount = dofs.size<int>();
-    kernel(dofCount, data, elemvect.data, dofs);
+    kernel(entries, data, elemvect.data, dofs);
   }
 
   void OccaVector::SetSubVector(const Array<int> &dofs,
                                 const double value) {
+    const int dofCount = dofs.Size();
+    if (dofCount == 0) {
+      return;
+    }
+    occa::device dev = data.getDevice();
+    occa::memory o_dofs = dev.malloc(dofCount * sizeof(int),
+                                     dofs.GetData());
+    SetSubVector(o_dofs, value, dofCount);
+  }
+
+  void OccaVector::SetSubVector(const occa::memory dofs,
+                                const double value) {
+    if (dofs.size()) {
+      SetSubVector(dofs, value, dofs.size<int>());
+    }
+  }
+
+  void OccaVector::SetSubVector(const occa::memory dofs,
+                                const double value,
+                                const int entries) {
     static occa::kernelBuilder builder =
       makeCustomBuilder("vector_set_subvector_const",
                         "const int dof_i = v1[i];"
                         "if (dof_i >= 0) { v0[dof_i]      =  c0; }"
                         "else            { v0[-dof_i - 1] = -c0; }",
                         "defines: { VTYPE1: 'int' }");
-    const int dofCount = dofs.Size();
-    if (dofCount == 0) {
-      return;
-    }
 
     occa::device dev = data.getDevice();
     occa::kernel kernel = builder.build(dev);
 
-    occa::memory o_dofs = dev.malloc(dofCount * sizeof(int),
-                                     dofs.GetData());
-    kernel(dofCount, value, data, o_dofs);
+    kernel(entries, value, data, dofs);
   }
 
   /// Add (element) subvector to the vector.
@@ -430,6 +453,12 @@ namespace mfem {
 
   void OccaVector::AddElementVector(occa::memory dofs,
                                     const OccaVector &elemvect) {
+    AddElementVector(dofs, elemvect, dofs.size<int>());
+  }
+
+  void OccaVector::AddElementVector(occa::memory dofs,
+                                    const OccaVector &elemvect,
+                                    const int entries) {
     static occa::kernelBuilder builder =
       makeCustomBuilder("vector_add_vec",
                         "const int dof_i = v2[i];"
@@ -440,8 +469,7 @@ namespace mfem {
     occa::device dev = data.getDevice();
     occa::kernel kernel = builder.build(dev);
 
-    const int dofCount = dofs.size<int>();
-    kernel(dofCount, data, elemvect.data, dofs);
+    kernel(entries, data, elemvect.data, dofs);
   }
 
   void OccaVector::AddElementVector(const Array<int> &dofs,
@@ -480,6 +508,13 @@ namespace mfem {
   void OccaVector::AddElementVector(occa::memory dofs,
                                     const double a,
                                     const OccaVector &elemvect) {
+    AddElementVector(dofs, a, elemvect, dofs.size<int>());
+  }
+
+  void OccaVector::AddElementVector(occa::memory dofs,
+                                    const double a,
+                                    const OccaVector &elemvect,
+                                    const int entries) {
     static occa::kernelBuilder builder =
       makeCustomBuilder("vector_add_a_vec",
                         "const int dof_i = v2[i];"
@@ -490,8 +525,7 @@ namespace mfem {
     occa::device dev = data.getDevice();
     occa::kernel kernel = builder.build(dev);
 
-    const int dofCount = dofs.size<int>();
-    kernel(dofCount, a, data, elemvect.data, dofs);
+    kernel(entries, a, data, elemvect.data, dofs);
   }
 
   /// Set all vector entries NOT in the 'dofs' array to the given 'val'.
