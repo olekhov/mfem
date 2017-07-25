@@ -42,6 +42,7 @@ namespace mfem {
                     RTOLERANCE, ATOLERANCE);
   }
 
+#ifdef MFEM_USE_MPI
   inline void CG(MPI_Comm comm,
                  const Operator &A, const OccaVector &b, OccaVector &x,
                  int print_iter = 0, int max_num_iter = 1000,
@@ -52,6 +53,7 @@ namespace mfem {
                     print_iter, max_num_iter,
                     RTOLERANCE, ATOLERANCE);
   }
+#endif
 
   inline void PCG(const Operator &A, Solver &B, const OccaVector &b, OccaVector &x,
                   int print_iter = 0, int max_num_iter = 1000,
@@ -63,6 +65,7 @@ namespace mfem {
                      RTOLERANCE, ATOLERANCE);
   }
 
+#ifdef MFEM_USE_MPI
   inline void PCG(MPI_Comm comm,
                   const Operator &A, Solver &B, const OccaVector &b, OccaVector &x,
                   int print_iter = 0, int max_num_iter = 1000,
@@ -74,6 +77,7 @@ namespace mfem {
                      print_iter, max_num_iter,
                      RTOLERANCE, ATOLERANCE);
   }
+#endif
 }
 
 #  endif

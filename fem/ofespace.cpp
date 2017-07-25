@@ -222,6 +222,10 @@ namespace mfem {
     return fespace->FEColl();
   }
 
+  const FiniteElement* OccaFiniteElementSpace::GetFE(const int idx) const {
+    return fespace->GetFE(idx);
+  }
+
   const int* OccaFiniteElementSpace::GetElementDofMap() const {
     return elementDofMap;
   }

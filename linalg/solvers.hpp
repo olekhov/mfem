@@ -321,6 +321,7 @@ void TCG(const Operator &A, const TVector &b, TVector &x,
    cg.Mult(b, x);
 }
 
+  #ifdef MFEM_USE_MPI
 /// Conjugate gradient method. (tolerances are squared)
 template <class TVector>
 void TCG(MPI_Comm comm,
@@ -336,6 +337,7 @@ void TCG(MPI_Comm comm,
    cg.SetOperator(A);
    cg.Mult(b, x);
 }
+#endif
 
 /// Preconditioned conjugate gradient method. (tolerances are squared)
 template <class TVector>
@@ -353,6 +355,7 @@ void TPCG(const Operator &A, Solver &B, const TVector &b, TVector &x,
    pcg.Mult(b, x);
 }
 
+#ifdef MFEM_USE_MPI
 /// Preconditioned conjugate gradient method. (tolerances are squared)
 template <class TVector>
 void TPCG(MPI_Comm comm,
@@ -369,6 +372,7 @@ void TPCG(MPI_Comm comm,
    pcg.SetPreconditioner(B);
    pcg.Mult(b, x);
 }
+#endif
 
 inline void CG(const Operator &A, const Vector &b, Vector &x,
                int print_iter = 0, int max_num_iter = 1000,
@@ -379,6 +383,7 @@ inline void CG(const Operator &A, const Vector &b, Vector &x,
               RTOLERANCE, ATOLERANCE);
 }
 
+#ifdef MFEM_USE_MPI
 inline void CG(MPI_Comm comm,
                const Operator &A, const Vector &b, Vector &x,
                int print_iter = 0, int max_num_iter = 1000,
@@ -389,6 +394,7 @@ inline void CG(MPI_Comm comm,
               print_iter, max_num_iter,
               RTOLERANCE, ATOLERANCE);
 }
+#endif
 
 inline void PCG(const Operator &A, Solver &B, const Vector &b, Vector &x,
                 int print_iter = 0, int max_num_iter = 1000,
@@ -399,6 +405,7 @@ inline void PCG(const Operator &A, Solver &B, const Vector &b, Vector &x,
                RTOLERANCE, ATOLERANCE);
 }
 
+#ifdef MFEM_USE_MPI
 inline void PCG(MPI_Comm comm,
                 const Operator &A, Solver &B, const Vector &b, Vector &x,
                 int print_iter = 0, int max_num_iter = 1000,
@@ -409,6 +416,7 @@ inline void PCG(MPI_Comm comm,
                print_iter, max_num_iter,
                RTOLERANCE, ATOLERANCE);
 }
+#endif
 
 /// GMRES method
 class GMRESSolver : public IterativeSolver
