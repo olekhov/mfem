@@ -202,6 +202,10 @@ namespace mfem {
     return localDofs;
   }
 
+  int OccaFiniteElementSpace::GetDim() const {
+    return fespace->GetMesh()->Dimension();
+  }
+
   int OccaFiniteElementSpace::GetVDim() const {
     return vdim;
   }

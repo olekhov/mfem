@@ -407,6 +407,7 @@ namespace mfem {
 
     props["defines/TRIAL_VDIM"] = trialFESpace.GetVDim();
     props["defines/TEST_VDIM"]  = testFESpace.GetVDim();
+    props["defines/NUM_DIM"]    = trialFESpace.GetDim();
 
     if (trialFESpace.hasTensorBasis()) {
       SetTensorProperties(trialFESpace, testFESpace, ir, props);

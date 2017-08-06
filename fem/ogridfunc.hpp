@@ -69,7 +69,7 @@ namespace mfem {
                 OccaVector &quadValues);
 
     void ToQuad(occa::device device,
-                OccaFiniteElementSpace fespace,
+                OccaFiniteElementSpace &fespace,
                 const IntegrationRule &ir,
                 OccaDofQuadMaps &maps,
                 OccaVector &quadValues);

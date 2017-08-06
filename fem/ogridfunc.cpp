@@ -26,7 +26,7 @@ namespace mfem {
     const int numQuad = ir.GetNPoints();
 
     const FiniteElement &fe = *(fespace.GetFE(0));
-    const int dim = fe.GetDim();
+    const int dim  = fe.GetDim();
     const int vdim = fespace.GetVDim();
 
     std::stringstream ss;
@@ -144,7 +144,7 @@ namespace mfem {
   }
 
   void OccaGridFunction::ToQuad(occa::device device,
-                                OccaFiniteElementSpace fespace,
+                                OccaFiniteElementSpace &fespace,
                                 const IntegrationRule &ir,
                                 OccaDofQuadMaps &maps,
                                 OccaVector &quadValues) {
@@ -156,12 +156,12 @@ namespace mfem {
     quadValues.SetSize(device,
                        numQuad * elements);
 
-    occa::kernel gridFuncToQuad = GetGridFunctionKernel(device, fespace, ir);
-    gridFuncToQuad(elements,
-                   maps.dofToQuad,
-                   ofespace->GetLocalToGlobalMap(),
-                   *this,
-                   quadValues);
+    occa::kernel g2qKernel = GetGridFunctionKernel(device, fespace, ir);
+    g2qKernel(elements,
+              maps.dofToQuad,
+              ofespace->GetLocalToGlobalMap(),
+              *this,
+              quadValues);
   }
 
   void OccaGridFunction::Distribute(const OccaVector &v) {

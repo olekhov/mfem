@@ -71,6 +71,8 @@ namespace mfem {
 
     int GetGlobalDofs() const;
     int GetLocalDofs() const;
+
+    int GetDim() const;
     int GetVDim() const;
 
     int GetVSize() const;
