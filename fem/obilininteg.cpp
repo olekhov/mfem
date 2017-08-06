@@ -66,13 +66,13 @@ namespace mfem {
 
     if (flags & Jacobian) {
       geom.J.allocate(device,
-                      dims*dims, numQuad, elements);
+                      dims, dims, numQuad, elements);
     } else {
       geom.J.allocate(device, 1);
     }
     if (flags & JacobianInv) {
       geom.invJ.allocate(device,
-                         dims*dims, numQuad, elements);
+                         dims, dims, numQuad, elements);
     } else {
       geom.invJ.allocate(device, 1);
     }
@@ -87,7 +87,7 @@ namespace mfem {
     geom.invJ.stopManaging();
     geom.detJ.stopManaging();
 
-    OccaDofQuadMaps &maps = OccaDofQuadMaps::GetSimplexMaps(device, fe, ir);
+    OccaDofQuadMaps &maps = OccaDofQuadMaps::GetSimplexMaps(device, ofespace, ir);
 
     occa::properties props;
     props["defines/NUM_DOFS"] = numDofs;
@@ -124,32 +124,52 @@ namespace mfem {
     return *this;
   }
 
+  OccaDofQuadMaps& OccaDofQuadMaps::Get(occa::device device,
+                                        const OccaFiniteElementSpace &fespace,
+                                        const IntegrationRule &ir,
+                                        const bool transpose) {
+    return (fespace.hasTensorBasis()
+            ? GetTensorMaps(device, fespace, ir, transpose)
+            : GetSimplexMaps(device, fespace, ir, transpose));
+  }
+
+  OccaDofQuadMaps& OccaDofQuadMaps::Get(occa::device device,
+                                        const OccaFiniteElementSpace &trialFESpace,
+                                        const OccaFiniteElementSpace &testFESpace,
+                                        const IntegrationRule &ir,
+                                        const bool transpose) {
+    return (trialFESpace.hasTensorBasis()
+            ? GetTensorMaps(device, trialFESpace, testFESpace, ir, transpose)
+            : GetSimplexMaps(device, trialFESpace, testFESpace, ir, transpose));
+  }
+
   OccaDofQuadMaps& OccaDofQuadMaps::GetTensorMaps(occa::device device,
-                                                  const FiniteElement &fe,
-                                                  const TensorBasisElement &tfe,
+                                                  const OccaFiniteElementSpace &fespace,
                                                   const IntegrationRule &ir,
                                                   const bool transpose) {
 
     return GetTensorMaps(device,
-                         fe, fe,
-                         tfe, tfe,
+                         fespace, fespace,
                          ir, transpose);
   }
 
   OccaDofQuadMaps& OccaDofQuadMaps::GetTensorMaps(occa::device device,
-                                                  const FiniteElement &trialFE,
-                                                  const FiniteElement &testFE,
-                                                  const TensorBasisElement &trialTFE,
-                                                  const TensorBasisElement &testTFE,
+                                                  const OccaFiniteElementSpace &trialFESpace,
+                                                  const OccaFiniteElementSpace &testFESpace,
                                                   const IntegrationRule &ir,
                                                   const bool transpose) {
+    const TensorBasisElement *trialFE =
+      dynamic_cast<const TensorBasisElement*>(trialFESpace.GetFE(0));
+    const TensorBasisElement *testFE =
+      dynamic_cast<const TensorBasisElement*>(testFESpace.GetFE(0));
+
     std::stringstream ss;
     ss << occa::hash(device)
        << "Tensor"
-       << "O1:"  << trialFE.GetOrder()
-       << "O2:"  << testFE.GetOrder()
-       << "BT1:" << trialTFE.GetBasisType()
-       << "BT2:" << testTFE.GetBasisType()
+       << "O1:"  << trialFE->GetDofMap().Size()
+       << "O2:"  << testFE->GetDofMap().Size()
+       << "BT1:" << trialFE->GetBasisType()
+       << "BT2:" << testFE->GetBasisType()
        << "Q:"   << ir.GetNPoints();
     std::string hash = ss.str();
 
@@ -159,8 +179,8 @@ namespace mfem {
       // Create the dof-quad maps
       maps.hash = hash;
 
-      OccaDofQuadMaps trialMaps = GetD2QTensorMaps(device, trialFE, trialTFE, ir);
-      OccaDofQuadMaps testMaps  = GetD2QTensorMaps(device, testFE , testTFE , ir, true);
+      OccaDofQuadMaps trialMaps = GetD2QTensorMaps(device, trialFESpace, ir);
+      OccaDofQuadMaps testMaps  = GetD2QTensorMaps(device, testFESpace , ir, true);
 
       maps.dofToQuad   = trialMaps.dofToQuad;
       maps.dofToQuadD  = trialMaps.dofToQuadD;
@@ -172,10 +192,12 @@ namespace mfem {
   }
 
   OccaDofQuadMaps OccaDofQuadMaps::GetD2QTensorMaps(occa::device device,
-                                                    const FiniteElement &fe,
-                                                    const TensorBasisElement &tfe,
+                                                    const OccaFiniteElementSpace &fespace,
                                                     const IntegrationRule &ir,
                                                     const bool transpose) {
+
+    const FiniteElement &fe = *(fespace.GetFE(0));
+    const TensorBasisElement &tfe = dynamic_cast<const TensorBasisElement&>(fe);
 
     const Poly_1D::Basis &basis = tfe.GetBasis1D();
     const int order = fe.GetOrder();
@@ -248,18 +270,23 @@ namespace mfem {
   }
 
   OccaDofQuadMaps& OccaDofQuadMaps::GetSimplexMaps(occa::device device,
-                                                   const FiniteElement &fe,
+                                                   const OccaFiniteElementSpace &fespace,
                                                    const IntegrationRule &ir,
                                                    const bool transpose) {
 
-    return GetSimplexMaps(device, fe, fe, ir, transpose);
+    return GetSimplexMaps(device,
+                          fespace, fespace,
+                          ir, transpose);
   }
 
   OccaDofQuadMaps& OccaDofQuadMaps::GetSimplexMaps(occa::device device,
-                                                   const FiniteElement &trialFE,
-                                                   const FiniteElement &testFE,
+                                                   const OccaFiniteElementSpace &trialFESpace,
+                                                   const OccaFiniteElementSpace &testFESpace,
                                                    const IntegrationRule &ir,
                                                    const bool transpose) {
+    const FiniteElement &trialFE = *(trialFESpace.GetFE(0));
+    const FiniteElement &testFE  = *(testFESpace.GetFE(0));
+
     std::stringstream ss;
     ss << occa::hash(device)
        << "Simplex"
@@ -274,8 +301,8 @@ namespace mfem {
       // Create the dof-quad maps
       maps.hash = hash;
 
-      OccaDofQuadMaps trialMaps = GetD2QSimplexMaps(device, trialFE, ir);
-      OccaDofQuadMaps testMaps  = GetD2QSimplexMaps(device, testFE , ir, true);
+      OccaDofQuadMaps trialMaps = GetD2QSimplexMaps(device, trialFESpace, ir);
+      OccaDofQuadMaps testMaps  = GetD2QSimplexMaps(device, testFESpace , ir, true);
 
       maps.dofToQuad   = trialMaps.dofToQuad;
       maps.dofToQuadD  = trialMaps.dofToQuadD;
@@ -284,13 +311,13 @@ namespace mfem {
       maps.quadWeights = testMaps.quadWeights;
     }
     return maps;
-
   }
 
   OccaDofQuadMaps OccaDofQuadMaps::GetD2QSimplexMaps(occa::device device,
-                                                     const FiniteElement &fe,
+                                                     const OccaFiniteElementSpace &fespace,
                                                      const IntegrationRule &ir,
                                                      const bool transpose) {
+    const FiniteElement &fe = *(fespace.GetFE(0));
     const int dims = fe.GetDim();
     const int numDofs = fe.GetDof();
     const int numQuad = ir.GetNPoints();
@@ -363,17 +390,45 @@ namespace mfem {
     return batch;
   }
 
-  void setTensorProperties(const FiniteElement &fe,
-                           const IntegrationRule &ir,
-                           occa::properties &props) {
+  void SetProperties(OccaFiniteElementSpace &fespace,
+                     const IntegrationRule &ir,
+                     occa::properties &props) {
 
-    setTensorProperties(fe, fe, ir, props);
+    SetProperties(fespace, fespace, ir, props);
   }
 
-  void setTensorProperties(const FiniteElement &trialFE,
-                           const FiniteElement &testFE,
+  void SetProperties(OccaFiniteElementSpace &trialFESpace,
+                     OccaFiniteElementSpace &testFESpace,
+                     const IntegrationRule &ir,
+                     occa::properties &props) {
+
+    const FiniteElement &trialFE = *(trialFESpace.GetFE(0));
+    const FiniteElement &testFE  = *(testFESpace.GetFE(0));
+
+    props["defines/TRIAL_VDIM"] = trialFESpace.GetVDim();
+    props["defines/TEST_VDIM"]  = testFESpace.GetVDim();
+
+    if (trialFESpace.hasTensorBasis()) {
+      SetTensorProperties(trialFESpace, testFESpace, ir, props);
+    } else {
+      SetSimplexProperties(trialFESpace, testFESpace, ir, props);
+    }
+  }
+
+  void SetTensorProperties(OccaFiniteElementSpace &fespace,
                            const IntegrationRule &ir,
                            occa::properties &props) {
+
+    SetTensorProperties(fespace, fespace, ir, props);
+  }
+
+  void SetTensorProperties(OccaFiniteElementSpace &trialFESpace,
+                           OccaFiniteElementSpace &testFESpace,
+                           const IntegrationRule &ir,
+                           occa::properties &props) {
+
+    const FiniteElement &trialFE = *(trialFESpace.GetFE(0));
+    const FiniteElement &testFE = *(testFESpace.GetFE(0));
 
     const IntegrationRule &ir1D = IntRules.Get(Geometry::SEGMENT, ir.GetOrder());
 
@@ -425,17 +480,21 @@ namespace mfem {
     props["defines/A3_QUAD_BATCH"]    = a3QuadBatch;
   }
 
-  void setSimplexProperties(const FiniteElement &fe,
+  void SetSimplexProperties(OccaFiniteElementSpace &fespace,
                             const IntegrationRule &ir,
                             occa::properties &props) {
 
-    setSimplexProperties(fe, fe, ir, props);
+    SetSimplexProperties(fespace, fespace, ir, props);
   }
 
-  void setSimplexProperties(const FiniteElement &trialFE,
-                            const FiniteElement &testFE,
+  void SetSimplexProperties(OccaFiniteElementSpace &trialFESpace,
+                            OccaFiniteElementSpace &testFESpace,
                             const IntegrationRule &ir,
                             occa::properties &props) {
+
+
+    const FiniteElement &trialFE = *(trialFESpace.GetFE(0));
+    const FiniteElement &testFE = *(testFESpace.GetFE(0));
 
     const int trialDofs = trialFE.GetDof();
     const int testDofs  = testFE.GetDof();
@@ -466,62 +525,38 @@ namespace mfem {
   OccaIntegrator::~OccaIntegrator() {}
 
   void OccaIntegrator::SetupMaps() {
-    const FiniteElement &trialFE = *(trialFespace->GetFE(0));
-    const TensorBasisElement *trialTFE = dynamic_cast<const TensorBasisElement*>(&trialFE);
+    maps = OccaDofQuadMaps::Get(device,
+                                *otrialFESpace,
+                                *otestFESpace,
+                                *ir);
 
-    const FiniteElement &testFE = *(testFespace->GetFE(0));
-    const TensorBasisElement *testTFE = dynamic_cast<const TensorBasisElement*>(&testFE);
-
-    OccaDofQuadMaps maps2;
-
-    if (trialTFE) {
-      maps = OccaDofQuadMaps::GetTensorMaps(device,
-                                            trialFE, testFE,
-                                            *trialTFE, *testTFE,
-                                            *ir);
-      mapsTranspose = OccaDofQuadMaps::GetTensorMaps(device,
-                                                     testFE, trialFE,
-                                                     *testTFE, *trialTFE,
-                                                     *ir);
-      hasTensorBasis = true;
-    } else {
-      maps = OccaDofQuadMaps::GetSimplexMaps(device,
-                                             trialFE, testFE,
-                                             *ir);
-      mapsTranspose = OccaDofQuadMaps::GetSimplexMaps(device,
-                                                      testFE, trialFE,
-                                                      *ir);
-      hasTensorBasis = false;
-    }
-  }
-
-  void OccaIntegrator::SetupProperties(occa::properties &props) {
-    const FiniteElement &trialFE = *(trialFespace->GetFE(0));
-    const FiniteElement &testFE  = *(testFespace->GetFE(0));
-
-    props["defines/TRIAL_VDIM"] = trialFespace->GetVDim();
-    props["defines/TEST_VDIM"]  = testFespace->GetVDim();
-
-    if (hasTensorBasis) {
-      setTensorProperties(trialFE, testFE, *ir, props);
-    } else {
-      setSimplexProperties(trialFE, testFE, *ir, props);
-    }
+    mapsTranspose = OccaDofQuadMaps::Get(device,
+                                         *otrialFESpace,
+                                         *otestFESpace,
+                                         *ir);
   }
 
   occa::device OccaIntegrator::GetDevice() {
     return device;
   }
 
-  FiniteElementSpace& OccaIntegrator::GetTrialFESpace() {
-    return *trialFespace;
+  OccaFiniteElementSpace& OccaIntegrator::GetTrialOccaFESpace() const {
+    return *otrialFESpace;
   }
 
-  FiniteElementSpace& OccaIntegrator::GetTestFESpace() {
-    return *testFespace;
+  OccaFiniteElementSpace& OccaIntegrator::GetTestOccaFESpace() const {
+    return *otestFESpace;
   }
 
-  const IntegrationRule& OccaIntegrator::GetIntegrationRule() {
+  FiniteElementSpace& OccaIntegrator::GetTrialFESpace() const {
+    return *trialFESpace;
+  }
+
+  FiniteElementSpace& OccaIntegrator::GetTestFESpace() const {
+    return *testFESpace;
+  }
+
+  const IntegrationRule& OccaIntegrator::GetIntegrationRule() const {
     return *ir;
   }
 
@@ -536,34 +571,40 @@ namespace mfem {
     bform     = &bform_;
     mesh      = &(bform_.GetMesh());
 
-    otrialFespace = &(bform_.GetTrialOccaFESpace());
-    otestFespace  = &(bform_.GetTestOccaFESpace());
+    otrialFESpace = &(bform_.GetTrialOccaFESpace());
+    otestFESpace  = &(bform_.GetTestOccaFESpace());
 
-    trialFespace = &(bform_.GetTrialFESpace());
-    testFespace  = &(bform_.GetTestFESpace());
+    trialFESpace = &(bform_.GetTrialFESpace());
+    testFESpace  = &(bform_.GetTestFESpace());
+
+    hasTensorBasis = otrialFESpace->hasTensorBasis();
 
     props = props_;
     itype = itype_;
 
     SetupIntegrationRule();
     SetupMaps();
-    SetupProperties(props);
+
+    SetProperties(*otrialFESpace,
+                  *otestFESpace,
+                  *ir,
+                  props);
 
     Setup();
   }
 
   OccaGeometry OccaIntegrator::GetGeometry(const int flags) {
-    return OccaGeometry::Get(device, *otrialFespace, *ir, flags);
+    return OccaGeometry::Get(device, *otrialFESpace, *ir, flags);
   }
 
   occa::kernel OccaIntegrator::GetAssembleKernel(const occa::properties &props) {
-    const FiniteElement &fe = *(trialFespace->GetFE(0));
+    const FiniteElement &fe = *(trialFESpace->GetFE(0));
     return GetKernel(stringWithDim("Assemble", fe.GetDim()),
                      props);
   }
 
   occa::kernel OccaIntegrator::GetMultAddKernel(const occa::properties &props) {
-    const FiniteElement &fe = *(trialFespace->GetFE(0));
+    const FiniteElement &fe = *(trialFESpace->GetFE(0));
     return GetKernel(stringWithDim("MultAdd", fe.GetDim()),
                      props);
   }
@@ -590,20 +631,20 @@ namespace mfem {
   }
 
   void OccaDiffusionIntegrator::SetupIntegrationRule() {
-    const FiniteElement &trialFE = *(trialFespace->GetFE(0));
-    const FiniteElement &testFE  = *(testFespace->GetFE(0));
+    const FiniteElement &trialFE = *(trialFESpace->GetFE(0));
+    const FiniteElement &testFE  = *(testFESpace->GetFE(0));
     ir = &(GetDiffusionIntegrationRule(trialFE, testFE));
   }
 
   void OccaDiffusionIntegrator::Setup() {
     occa::properties kernelProps = props;
 
-    const FiniteElement &fe = *(trialFespace->GetFE(0));
+    const FiniteElement &fe = *(trialFESpace->GetFE(0));
 
     const int dims = fe.GetDim();
     const int symmDims = (dims * (dims + 1)) / 2; // 1x1: 1, 2x2: 3, 3x3: 6
 
-    const int elements = trialFespace->GetNE();
+    const int elements = trialFESpace->GetNE();
     const int quadraturePoints = ir->GetNPoints();
 
     assembledOperator.allocate(symmDims, quadraturePoints, elements);
@@ -651,15 +692,15 @@ namespace mfem {
   }
 
   void OccaMassIntegrator::SetupIntegrationRule() {
-    const FiniteElement &trialFE = *(trialFespace->GetFE(0));
-    const FiniteElement &testFE  = *(testFespace->GetFE(0));
+    const FiniteElement &trialFE = *(trialFESpace->GetFE(0));
+    const FiniteElement &testFE  = *(testFESpace->GetFE(0));
     ir = &(GetMassIntegrationRule(trialFE, testFE));
   }
 
   void OccaMassIntegrator::Setup() {
     occa::properties kernelProps = props;
 
-    const int elements = trialFespace->GetNE();
+    const int elements = trialFESpace->GetNE();
     const int quadraturePoints = ir->GetNPoints();
 
     assembledOperator.allocate(quadraturePoints, elements);
@@ -707,15 +748,15 @@ namespace mfem {
   }
 
   void OccaVectorMassIntegrator::SetupIntegrationRule() {
-    const FiniteElement &trialFE = *(trialFespace->GetFE(0));
-    const FiniteElement &testFE  = *(testFespace->GetFE(0));
+    const FiniteElement &trialFE = *(trialFESpace->GetFE(0));
+    const FiniteElement &testFE  = *(testFESpace->GetFE(0));
     ir = &(GetMassIntegrationRule(trialFE, testFE));
   }
 
   void OccaVectorMassIntegrator::Setup() {
     occa::properties kernelProps = props;
 
-    const int elements = trialFespace->GetNE();
+    const int elements = trialFESpace->GetNE();
     const int quadraturePoints = ir->GetNPoints();
 
     assembledOperator.allocate(quadraturePoints, elements);

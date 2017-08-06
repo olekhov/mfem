@@ -162,11 +162,23 @@ namespace mfem {
                                              props);
   }
 
+  occa::device OccaFiniteElementSpace::GetDevice() {
+    return device;
+  }
+
   Mesh* OccaFiniteElementSpace::GetMesh() {
     return fespace->GetMesh();
   }
 
+  const Mesh* OccaFiniteElementSpace::GetMesh() const {
+    return fespace->GetMesh();
+  }
+
   FiniteElementSpace* OccaFiniteElementSpace::GetFESpace() {
+    return fespace;
+  }
+
+  const FiniteElementSpace* OccaFiniteElementSpace::GetFESpace() const {
     return fespace;
   }
 
@@ -176,6 +188,10 @@ namespace mfem {
 #else
     return dynamic_cast<ParMesh*>(fespace->GetMesh());
 #endif
+  }
+
+  bool OccaFiniteElementSpace::hasTensorBasis() const {
+    return dynamic_cast<const TensorBasisElement*>(fespace->GetFE(0));
   }
 
   int OccaFiniteElementSpace::GetGlobalDofs() const {
@@ -216,6 +232,10 @@ namespace mfem {
     }
 #endif
     return fespace->GetTrueVSize();
+  }
+
+  int OccaFiniteElementSpace::GetNE() const {
+    return fespace->GetNE();
   }
 
   const FiniteElementCollection* OccaFiniteElementSpace::FEColl() const {

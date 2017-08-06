@@ -58,6 +58,11 @@ namespace mfem {
     SetSize(device, v.Size(), v.GetData());
   }
 
+  OccaVector::OccaVector(occa::array<double> &v) :
+    size(0) {
+    SetDataAndSize(v.memory(), v.size());
+  }
+
   /// Convert to Vector
   OccaVector::operator Vector() const {
     Vector v(size);

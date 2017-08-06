@@ -65,39 +65,46 @@ namespace mfem {
     // GetVdim()
     // 3D ordering == byVDIM  -> [x y z x y z x y z x y z x y z x y z]
     //    ordering == byNODES -> [x x x x x x y y y y y y z z z z z z]
+    static OccaDofQuadMaps& Get(occa::device device,
+                                const OccaFiniteElementSpace &fespace,
+                                const IntegrationRule &ir,
+                                const bool transpose = false);
+
+    static OccaDofQuadMaps& Get(occa::device device,
+                                const OccaFiniteElementSpace &trialFESpace,
+                                const OccaFiniteElementSpace &testFESpace,
+                                const IntegrationRule &ir,
+                                const bool transpose = false);
+
     static OccaDofQuadMaps& GetTensorMaps(occa::device device,
-                                          const FiniteElement &fe,
-                                          const TensorBasisElement &tfe,
+                                          const OccaFiniteElementSpace &fespace,
                                           const IntegrationRule &ir,
                                           const bool transpose = false);
 
     static OccaDofQuadMaps& GetTensorMaps(occa::device device,
-                                          const FiniteElement &trialFE,
-                                          const FiniteElement &testFE,
-                                          const TensorBasisElement &trialTFE,
-                                          const TensorBasisElement &testTFE,
+                                          const OccaFiniteElementSpace &trialFESpace,
+                                          const OccaFiniteElementSpace &testFESpace,
                                           const IntegrationRule &ir,
                                           const bool transpose = false);
 
     static OccaDofQuadMaps GetD2QTensorMaps(occa::device device,
-                                            const FiniteElement &fe,
-                                            const TensorBasisElement &tfe,
+                                            const OccaFiniteElementSpace &fespace,
                                             const IntegrationRule &ir,
                                             const bool transpose = false);
 
     static OccaDofQuadMaps& GetSimplexMaps(occa::device device,
-                                           const FiniteElement &fe,
+                                           const OccaFiniteElementSpace &fespace,
                                            const IntegrationRule &ir,
                                            const bool transpose = false);
 
     static OccaDofQuadMaps& GetSimplexMaps(occa::device device,
-                                           const FiniteElement &trialFE,
-                                           const FiniteElement &testFE,
+                                           const OccaFiniteElementSpace &trialFESpace,
+                                           const OccaFiniteElementSpace &testFESpace,
                                            const IntegrationRule &ir,
                                            const bool transpose = false);
 
     static OccaDofQuadMaps GetD2QSimplexMaps(occa::device device,
-                                             const FiniteElement &fe,
+                                             const OccaFiniteElementSpace &fespace,
                                              const IntegrationRule &ir,
                                              const bool transpose = false);
   };
@@ -106,21 +113,30 @@ namespace mfem {
   std::string stringWithDim(const std::string &s, const int dim);
   int closestWarpBatch(const int multiple, const int maxSize);
 
-  void setTensorProperties(const FiniteElement &fe,
+  void SetProperties(OccaFiniteElementSpace &fespace,
+                     const IntegrationRule &ir,
+                     occa::properties &props);
+
+  void SetProperties(OccaFiniteElementSpace &trialFESpace,
+                     OccaFiniteElementSpace &testFESpace,
+                     const IntegrationRule &ir,
+                     occa::properties &props);
+
+  void SetTensorProperties(OccaFiniteElementSpace &fespace,
                            const IntegrationRule &ir,
                            occa::properties &props);
 
-  void setTensorProperties(const FiniteElement &fe,
-                           const FiniteElement &fe2,
+  void SetTensorProperties(OccaFiniteElementSpace &trialFESpace,
+                           OccaFiniteElementSpace &testFESpace,
                            const IntegrationRule &ir,
                            occa::properties &props);
 
-  void setSimplexProperties(const FiniteElement &fe,
+  void SetSimplexProperties(OccaFiniteElementSpace &fespace,
                             const IntegrationRule &ir,
                             occa::properties &props);
 
-  void setSimplexProperties(const FiniteElement &fe,
-                           const FiniteElement &fe2,
+  void SetSimplexProperties(OccaFiniteElementSpace &trialFESpace,
+                            OccaFiniteElementSpace &testFESpace,
                             const IntegrationRule &ir,
                             occa::properties &props);
 
@@ -132,11 +148,11 @@ namespace mfem {
     OccaBilinearForm *bform;
     Mesh *mesh;
 
-    OccaFiniteElementSpace *otrialFespace;
-    OccaFiniteElementSpace *otestFespace;
+    OccaFiniteElementSpace *otrialFESpace;
+    OccaFiniteElementSpace *otestFESpace;
 
-    FiniteElementSpace *trialFespace;
-    FiniteElementSpace *testFespace;
+    FiniteElementSpace *trialFESpace;
+    FiniteElementSpace *testFESpace;
 
     occa::properties props;
     OccaIntegratorType itype;
@@ -154,14 +170,16 @@ namespace mfem {
 
     virtual std::string GetName() = 0;
 
-    FiniteElementSpace& GetTrialFESpace();
-    FiniteElementSpace& GetTestFESpace();
+    OccaFiniteElementSpace& GetTrialOccaFESpace() const;
+    OccaFiniteElementSpace& GetTestOccaFESpace() const;
 
-    const IntegrationRule& GetIntegrationRule();
+    FiniteElementSpace& GetTrialFESpace() const;
+    FiniteElementSpace& GetTestFESpace() const;
+
+    const IntegrationRule& GetIntegrationRule() const;
     OccaDofQuadMaps& GetDofQuadMaps();
 
     void SetupMaps();
-    void SetupProperties(occa::properties &props);
 
     virtual void SetupIntegrationRule() = 0;
 

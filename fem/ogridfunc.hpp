@@ -24,10 +24,13 @@
 
 namespace mfem {
   class OccaIntegrator;
+  class OccaDofQuadMaps;
 
   extern std::map<std::string, occa::kernel> gridFunctionKernels;
 
-  occa::kernel GetGridFunctionKernel(OccaIntegrator &integ);
+  occa::kernel GetGridFunctionKernel(occa::device device,
+                                     OccaFiniteElementSpace &fespace,
+                                     const IntegrationRule &ir);
 
   class OccaGridFunction : public OccaVector {
   protected:
@@ -63,6 +66,12 @@ namespace mfem {
     const FiniteElementSpace* GetFESpace() const;
 
     void ToQuad(OccaIntegrator &integ,
+                OccaVector &quadValues);
+
+    void ToQuad(occa::device device,
+                OccaFiniteElementSpace fespace,
+                const IntegrationRule &ir,
+                OccaDofQuadMaps &maps,
                 OccaVector &quadValues);
 
     void Distribute(const OccaVector &v);

@@ -19,11 +19,12 @@
 namespace mfem {
   std::map<std::string, occa::kernel> gridFunctionKernels;
 
-  occa::kernel GetGridFunctionKernel(OccaIntegrator &integ) {
-    occa::device device = integ.GetDevice();
-    const int numQuad = integ.GetIntegrationRule().GetNPoints();
+  occa::kernel GetGridFunctionKernel(occa::device device,
+                                     OccaFiniteElementSpace &fespace,
+                                     const IntegrationRule &ir) {
 
-    const FiniteElementSpace &fespace = integ.GetTrialFESpace();
+    const int numQuad = ir.GetNPoints();
+
     const FiniteElement &fe = *(fespace.GetFE(0));
     const int dim = fe.GetDim();
     const int vdim = fespace.GetVDim();
@@ -39,7 +40,8 @@ namespace mfem {
     // Kernel defines
     occa::properties props;
     props["defines/NUM_VDIM"] = vdim;
-    integ.SetupProperties(props);
+
+    SetProperties(fespace, ir, props);
 
     occa::kernel kernel = gridFunctionKernels[hash];
     if (!kernel.isInitialized()) {
@@ -134,20 +136,27 @@ namespace mfem {
 
   void OccaGridFunction::ToQuad(OccaIntegrator &integ,
                                 OccaVector &quadValues) {
+    ToQuad(integ.GetDevice(),
+           integ.GetTrialOccaFESpace(),
+           integ.GetIntegrationRule(),
+           integ.GetDofQuadMaps(),
+           quadValues);
+  }
 
-    occa::device device = integ.GetDevice();
+  void OccaGridFunction::ToQuad(occa::device device,
+                                OccaFiniteElementSpace fespace,
+                                const IntegrationRule &ir,
+                                OccaDofQuadMaps &maps,
+                                OccaVector &quadValues) {
 
-    OccaDofQuadMaps &maps = integ.GetDofQuadMaps();
-
-    const FiniteElementSpace &fespace = integ.GetTrialFESpace();
     const FiniteElement &fe = *(fespace.GetFE(0));
 
     const int elements = fespace.GetNE();
-    const int numQuad  = integ.GetIntegrationRule().GetNPoints();
+    const int numQuad  = ir.GetNPoints();
     quadValues.SetSize(device,
                        numQuad * elements);
 
-    occa::kernel gridFuncToQuad = GetGridFunctionKernel(integ);
+    occa::kernel gridFuncToQuad = GetGridFunctionKernel(device, fespace, ir);
     gridFuncToQuad(elements,
                    maps.dofToQuad,
                    ofespace->GetLocalToGlobalMap(),

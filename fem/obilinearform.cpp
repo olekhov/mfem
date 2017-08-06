@@ -34,41 +34,41 @@ namespace mfem {
     Init(device, ofespace_, ofespace_);
   }
 
-  OccaBilinearForm::OccaBilinearForm(OccaFiniteElementSpace *otrialFespace_,
-                                     OccaFiniteElementSpace *otestFespace_) :
-    Operator(otrialFespace_->GetVSize(),
-             otestFespace_->GetVSize()) {
-    Init(occa::getDevice(), otrialFespace_, otestFespace_);
+  OccaBilinearForm::OccaBilinearForm(OccaFiniteElementSpace *otrialFESpace_,
+                                     OccaFiniteElementSpace *otestFESpace_) :
+    Operator(otrialFESpace_->GetVSize(),
+             otestFESpace_->GetVSize()) {
+    Init(occa::getDevice(), otrialFESpace_, otestFESpace_);
   }
 
   OccaBilinearForm::OccaBilinearForm(occa::device device_,
-                                     OccaFiniteElementSpace *otrialFespace_,
-                                     OccaFiniteElementSpace *otestFespace_) :
-    Operator(otrialFespace_->GetVSize(),
-             otestFespace_->GetVSize()) {
-    Init(device, otrialFespace_, otestFespace_);
+                                     OccaFiniteElementSpace *otrialFESpace_,
+                                     OccaFiniteElementSpace *otestFESpace_) :
+    Operator(otrialFESpace_->GetVSize(),
+             otestFESpace_->GetVSize()) {
+    Init(device, otrialFESpace_, otestFESpace_);
   }
 
   void OccaBilinearForm::Init(occa::device device_,
-                              OccaFiniteElementSpace *otrialFespace_,
-                              OccaFiniteElementSpace *otestFespace_) {
+                              OccaFiniteElementSpace *otrialFESpace_,
+                              OccaFiniteElementSpace *otestFESpace_) {
     device = device_;
 
-    otrialFespace = otrialFespace_;
-    trialFespace  = otrialFespace_->GetFESpace();
+    otrialFESpace = otrialFESpace_;
+    trialFESpace  = otrialFESpace_->GetFESpace();
 
-    otestFespace = otestFespace_;
-    testFespace  = otestFespace_->GetFESpace();
+    otestFESpace = otestFESpace_;
+    testFESpace  = otestFESpace_->GetFESpace();
 
-    mesh = trialFespace->GetMesh();
+    mesh = trialFESpace->GetMesh();
 
     const int elements = GetNE();
 
-    const int trialVDim = trialFespace->GetVDim();
-    const int testVDim  = testFespace->GetVDim();
+    const int trialVDim = trialFESpace->GetVDim();
+    const int testVDim  = testFESpace->GetVDim();
 
-    const int trialLocalDofs = otrialFespace->GetLocalDofs();
-    const int testLocalDofs  = otestFespace->GetLocalDofs();
+    const int trialLocalDofs = otrialFESpace->GetLocalDofs();
+    const int testLocalDofs  = otestFESpace->GetLocalDofs();
 
     const int trialElementEntries = (trialLocalDofs * trialVDim);
     const int testElementEntries  = (testLocalDofs * testVDim);
@@ -113,44 +113,44 @@ namespace mfem {
     return *mesh;
   }
 
-  FiniteElementSpace& OccaBilinearForm::GetTrialFESpace() const {
-    return *trialFespace;
-  }
-
-  FiniteElementSpace& OccaBilinearForm::GetTestFESpace() const {
-    return *testFespace;
-  }
-
   OccaFiniteElementSpace& OccaBilinearForm::GetTrialOccaFESpace() const {
-    return *otrialFespace;
+    return *otrialFESpace;
   }
 
   OccaFiniteElementSpace& OccaBilinearForm::GetTestOccaFESpace() const {
-    return *otestFespace;
+    return *otestFESpace;
+  }
+
+  FiniteElementSpace& OccaBilinearForm::GetTrialFESpace() const {
+    return *trialFESpace;
+  }
+
+  FiniteElementSpace& OccaBilinearForm::GetTestFESpace() const {
+    return *testFESpace;
   }
 
   int64_t OccaBilinearForm::GetTrialNDofs() const {
-    return trialFespace->GetNDofs();
+    return trialFESpace->GetNDofs();
   }
 
   int64_t OccaBilinearForm::GetTestNDofs() const {
-    return testFespace->GetNDofs();
+    return testFESpace->GetNDofs();
   }
 
   int64_t OccaBilinearForm::GetTrialVDim() const {
-    return trialFespace->GetVDim();
+    return trialFESpace->GetVDim();
   }
 
   int64_t OccaBilinearForm::GetTestVDim() const {
-    return testFespace->GetVDim();
+    return testFESpace->GetVDim();
   }
 
   const FiniteElement& OccaBilinearForm::GetTrialFE(const int i) const {
-    return *(trialFespace->GetFE(i));
+    return *(trialFESpace->GetFE(i));
   }
 
   const FiniteElement& OccaBilinearForm::GetTestFE(const int i) const {
-    return *(testFespace->GetFE(i));
+    return *(testFESpace->GetFE(i));
   }
 
   // Adds new Domain Integrator.
@@ -200,19 +200,19 @@ namespace mfem {
   }
 
   const Operator* OccaBilinearForm::GetTrialProlongation() const {
-    return otrialFespace->GetProlongationOperator();
+    return otrialFESpace->GetProlongationOperator();
   }
 
   const Operator* OccaBilinearForm::GetTestProlongation() const {
-    return otestFespace->GetProlongationOperator();
+    return otestFESpace->GetProlongationOperator();
   }
 
   const Operator* OccaBilinearForm::GetTrialRestriction() const {
-    return otrialFespace->GetRestrictionOperator();
+    return otrialFESpace->GetRestrictionOperator();
   }
 
   const Operator* OccaBilinearForm::GetTestRestriction() const {
-    return otestFespace->GetRestrictionOperator();
+    return otestFESpace->GetRestrictionOperator();
   }
 
   //
@@ -283,7 +283,7 @@ namespace mfem {
 
   // Matrix vector multiplication.
   void OccaBilinearForm::Mult(const OccaVector &x, OccaVector &y) const {
-    otrialFespace->GlobalToLocal(x, localX);
+    otrialFESpace->GlobalToLocal(x, localX);
     localY = 0;
 
     const int integratorCount = (int) integrators.size();
@@ -291,12 +291,12 @@ namespace mfem {
       integrators[i]->MultAdd(localX, localY);
     }
 
-    otestFespace->LocalToGlobal(localY, y);
+    otestFESpace->LocalToGlobal(localY, y);
   }
 
   // Matrix transpose vector multiplication.
   void OccaBilinearForm::MultTranspose(const OccaVector &x, OccaVector &y) const {
-    otestFespace->GlobalToLocal(x, localX);
+    otestFESpace->GlobalToLocal(x, localX);
     localY = 0;
 
     const int integratorCount = (int) integrators.size();
@@ -304,7 +304,7 @@ namespace mfem {
       integrators[i]->MultTransposeAdd(localX, localY);
     }
 
-    otrialFespace->LocalToGlobal(localY, y);
+    otrialFESpace->LocalToGlobal(localY, y);
   }
 
 

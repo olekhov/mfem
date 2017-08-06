@@ -58,10 +58,16 @@ namespace mfem {
     void SetupOperators();
     void SetupKernels();
 
+    occa::device GetDevice();
+
     Mesh* GetMesh();
+    const Mesh* GetMesh() const;
+
     FiniteElementSpace* GetFESpace();
+    const FiniteElementSpace* GetFESpace() const;
 
     bool isDistributed() const;
+    bool hasTensorBasis() const;
 
     int GetGlobalDofs() const;
     int GetLocalDofs() const;
@@ -71,6 +77,8 @@ namespace mfem {
     int GetTrueVSize() const;
     int GetGlobalVSize() const;
     int GetGlobalTrueVSize() const;
+
+    int GetNE() const;
 
     const FiniteElementCollection* FEColl() const;
     const FiniteElement* GetFE(const int idx) const;

@@ -56,6 +56,8 @@ namespace mfem
     /// Creates vector based on Vector using the passed OCCA device
     OccaVector(occa::device device, const Vector &v);
 
+    OccaVector(occa::array<double> &v);
+
     /// Convert to Vector
     operator Vector() const;
 

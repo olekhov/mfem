@@ -49,11 +49,11 @@ namespace mfem {
     // State information
     mutable Mesh *mesh;
 
-    mutable OccaFiniteElementSpace *otrialFespace;
-    mutable FiniteElementSpace *trialFespace;
+    mutable OccaFiniteElementSpace *otrialFESpace;
+    mutable FiniteElementSpace *trialFESpace;
 
-    mutable OccaFiniteElementSpace *otestFespace;
-    mutable FiniteElementSpace *testFespace;
+    mutable OccaFiniteElementSpace *otestFESpace;
+    mutable FiniteElementSpace *testFESpace;
 
     IntegratorVector integrators;
 
@@ -69,15 +69,15 @@ namespace mfem {
     OccaBilinearForm(occa::device device_,
                      OccaFiniteElementSpace *ofespace_);
 
-    OccaBilinearForm(OccaFiniteElementSpace *otrialFespace_,
-                     OccaFiniteElementSpace *otestFespace_);
+    OccaBilinearForm(OccaFiniteElementSpace *otrialFESpace_,
+                     OccaFiniteElementSpace *otestFESpace_);
     OccaBilinearForm(occa::device device_,
-                     OccaFiniteElementSpace *otrialFespace_,
-                     OccaFiniteElementSpace *otestFespace_);
+                     OccaFiniteElementSpace *otrialFESpace_,
+                     OccaFiniteElementSpace *otestFESpace_);
 
     void Init(occa::device device_,
-              OccaFiniteElementSpace *otrialFespace_,
-              OccaFiniteElementSpace *otestFespace_);
+              OccaFiniteElementSpace *otrialFESpace_,
+              OccaFiniteElementSpace *otestFESpace_);
 
     occa::device GetDevice();
 
@@ -88,11 +88,11 @@ namespace mfem {
 
     Mesh& GetMesh() const;
 
-    FiniteElementSpace& GetTrialFESpace() const;
     OccaFiniteElementSpace& GetTrialOccaFESpace() const;
-
-    FiniteElementSpace& GetTestFESpace() const;
     OccaFiniteElementSpace& GetTestOccaFESpace() const;
+
+    FiniteElementSpace& GetTrialFESpace() const;
+    FiniteElementSpace& GetTestFESpace() const;
 
     // Useful FE information
     int64_t GetTrialNDofs() const;
