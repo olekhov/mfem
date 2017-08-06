@@ -38,6 +38,7 @@
 typedef double* DofToQuad_t @dim(NUM_QUAD_1D, NUM_DOFS_1D);
 typedef double* QuadToDof_t @dim(NUM_DOFS_1D, NUM_QUAD_1D);
 
+typedef double* Jacobian_t   @dim(NUM_DIM, NUM_DIM, numElements);
 typedef double* Jacobian1D_t @dim(NUM_QUAD_1D, numElements);
 typedef double* Jacobian2D_t @dim(2, 2, NUM_QUAD_2D, numElements);
 typedef double* Jacobian3D_t @dim(3, 3, NUM_QUAD_3D, numElements);
