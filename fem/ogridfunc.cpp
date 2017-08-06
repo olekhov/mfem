@@ -139,17 +139,16 @@ namespace mfem {
     ToQuad(integ.GetDevice(),
            integ.GetTrialOccaFESpace(),
            integ.GetIntegrationRule(),
-           integ.GetDofQuadMaps(),
            quadValues);
   }
 
   void OccaGridFunction::ToQuad(occa::device device,
                                 OccaFiniteElementSpace &fespace,
                                 const IntegrationRule &ir,
-                                OccaDofQuadMaps &maps,
                                 OccaVector &quadValues) {
 
     const FiniteElement &fe = *(fespace.GetFE(0));
+    OccaDofQuadMaps &maps = OccaDofQuadMaps::Get(device, fespace, ir);
 
     const int elements = fespace.GetNE();
     const int numQuad  = ir.GetNPoints();
