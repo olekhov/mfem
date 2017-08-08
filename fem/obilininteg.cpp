@@ -41,7 +41,7 @@ namespace mfem {
     const int numQuad  = ir.GetNPoints();
 
     Ordering::Type originalOrdering = fespace.GetOrdering();
-    nodes.ReorderByVDim();
+    nodes.ReorderByVDim(true);
     geom.meshNodes.allocate(device,
                             dims, numDofs, elements);
 
@@ -59,9 +59,9 @@ namespace mfem {
 
     // Reorder the original gf back
     if (originalOrdering == Ordering::byNODES) {
-      nodes.ReorderByNodes();
+      nodes.ReorderByNodes(true);
     } else {
-      nodes.ReorderByVDim();
+      nodes.ReorderByVDim(true);
     }
 
     if (flags & Jacobian) {

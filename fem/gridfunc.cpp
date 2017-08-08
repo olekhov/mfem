@@ -695,9 +695,9 @@ void GridFunction::GetVectorFieldValues(
    }
 }
 
-void GridFunction::ReorderByNodes()
+void GridFunction::ReorderByNodes(const bool force)
 {
-   if (fes->GetOrdering() == Ordering::byNODES)
+   if (!force && (fes->GetOrdering() == Ordering::byNODES))
    {
       return;
    }
@@ -722,9 +722,9 @@ void GridFunction::ReorderByNodes()
    delete [] temp;
 }
 
-void GridFunction::ReorderByVDim()
+void GridFunction::ReorderByVDim(const bool force)
 {
-   if (fes->GetOrdering() == Ordering::byVDIM)
+   if (!force && (fes->GetOrdering() == Ordering::byVDIM))
    {
       return;
    }
