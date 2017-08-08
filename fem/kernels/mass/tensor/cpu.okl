@@ -32,7 +32,6 @@ kernel void MultAdd1D(const int numElements,
                       const QLocal1D_t restrict oper,
                       const DLocal1D_t restrict solIn,
                       DLocal1D_t restrict solOut) {
-  // Iterate over elements
   for (int e = 0; e < numElements; ++e; outer) {
     for (int dummy = 0; dummy < 1; ++dummy; inner) {
       double sol_x[NUM_QUAD_1D];
@@ -75,7 +74,7 @@ kernel void Assemble2D(const int numElements,
 
       oper(q, e) = quadWeights[q] * COEFF * ((J11 * J22) - (J21 * J12));
     }
-  } // e
+  }
 }
 
 kernel void MultAdd2D(const int numElements,
@@ -86,7 +85,6 @@ kernel void MultAdd2D(const int numElements,
                       const QLocal2D_t restrict oper,
                       const DLocal2D_t restrict solIn,
                       DLocal2D_t restrict solOut) {
-  // Iterate over elements
   for (int e = 0; e < numElements; ++e; outer) {
     for (int dummy=0; dummy<1; ++dummy; inner) {
       double sol_xy[NUM_QUAD_1D][NUM_QUAD_1D];
@@ -118,7 +116,7 @@ kernel void MultAdd2D(const int numElements,
             sol_xy[qy][qx] += d2q * sol_x[qx];
           }
         }
-      } // dy
+      }
 
       // sol_xy{qx, qy} = sol_xy{q} *= oper{q, e}
       for (int qy = 0; qy < NUM_QUAD_1D; ++qy) {
@@ -129,7 +127,7 @@ kernel void MultAdd2D(const int numElements,
 
       for (int qy = 0; qy < NUM_QUAD_1D; ++qy) {
         double sol_x[NUM_DOFS_1D];
-        for (int dx = 0; dx < NUM_QUAD_1D; ++dx) {
+        for (int dx = 0; dx < NUM_DOFS_1D; ++dx) {
           sol_x[dx] = 0;
         }
 
@@ -149,8 +147,8 @@ kernel void MultAdd2D(const int numElements,
           }
         }
       }
-    } // dummy
-  } // e
+    }
+  }
 }
 //======================================
 
@@ -224,7 +222,7 @@ kernel void MultAdd3D(const int numElements,
               sol_xy[qy][qx] += wy * sol_x[qx];
             }
           }
-        } // dy
+        }
 
         for (int qz = 0; qz < NUM_QUAD_1D; ++qz) {
           const double wz = dofToQuad(qz, dz);
@@ -234,7 +232,7 @@ kernel void MultAdd3D(const int numElements,
             }
           }
         }
-      } // dz
+      }
 
       // sol_xyz{qz, qy, qx} *= oper{q, e}
       for (int qz = 0; qz < NUM_QUAD_1D; ++qz) {
@@ -274,7 +272,7 @@ kernel void MultAdd3D(const int numElements,
               sol_xy[dy][dx] += wy * sol_x[dx];
             }
           }
-        } // qy
+        }
 
         for (int dz = 0; dz < NUM_DOFS_1D; ++dz) {
           const double wz = quadToDof(dz, qz);
@@ -284,8 +282,8 @@ kernel void MultAdd3D(const int numElements,
             }
           }
         }
-      } // qz
-    } // dummy
-  } // e
+      }
+    }
+  }
 }
 //======================================

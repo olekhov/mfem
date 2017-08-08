@@ -151,7 +151,7 @@ kernel void MultAdd2D(const int numElements,
         }
         for (int qy = 0; qy < NUM_MAX_1D; ++qy; inner) {
           if (qy < NUM_QUAD_1D) {
-            for (int qx = 0; qx < NUM_MAX_1D; ++qx) {
+            for (int qx = 0; qx < NUM_QUAD_1D; ++qx) {
               double s = 0;
               for (int dx = 0; dx < NUM_DOFS_1D; ++dx) {
                 s += s_xy(dx, qy) * s_dofToQuad(qx, dx);
