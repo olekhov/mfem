@@ -557,6 +557,10 @@ namespace mfem {
     return *testFESpace;
   }
 
+  void OccaIntegrator::SetIntegrationRule(const IntegrationRule &ir_) {
+    ir = &ir_;
+  }
+
   const IntegrationRule& OccaIntegrator::GetIntegrationRule() const {
     return *ir;
   }
@@ -583,7 +587,10 @@ namespace mfem {
     props = props_;
     itype = itype_;
 
-    SetupIntegrationRule();
+    if (ir == NULL) {
+      SetupIntegrationRule();
+    }
+
     SetupMaps();
 
     SetProperties(*otrialFESpace,

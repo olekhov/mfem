@@ -19,7 +19,8 @@ kernel void Assemble1D(const int numElements,
                        QLocal_t restrict oper) {
   for (int e = 0; e < numElements; ++e; outer) {
     for (int q = 0; q < NUM_QUAD_1D; ++q; inner) {
-      oper(q, e) = quadWeights[q] * COEFF * J(q, e);
+      const double detJ = J(q, e);
+      oper(q, e) = quadWeights[q] * COEFF * detJ;
     }
   }
 }
@@ -71,8 +72,9 @@ kernel void Assemble2D(const int numElements,
     for (int q = 0; q < NUM_QUAD_2D; ++q; inner) {
       const double J11 = J(0, 0, q, e), J12 = J(1, 0, q, e);
       const double J21 = J(0, 1, q, e), J22 = J(1, 1, q, e);
+      const double detJ = ((J11 * J22) - (J21 * J12));
 
-      oper(q, e) = quadWeights[q] * COEFF * ((J11 * J22) - (J21 * J12));
+      oper(q, e) = quadWeights[q] * COEFF * detJ;
     }
   }
 }

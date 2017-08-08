@@ -176,7 +176,9 @@ namespace mfem {
     FiniteElementSpace& GetTrialFESpace() const;
     FiniteElementSpace& GetTestFESpace() const;
 
+    void SetIntegrationRule(const IntegrationRule &ir_);
     const IntegrationRule& GetIntegrationRule() const;
+
     OccaDofQuadMaps& GetDofQuadMaps();
 
     void SetupMaps();
