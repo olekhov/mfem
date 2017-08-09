@@ -163,7 +163,7 @@ kernel void MultAdd2D(const int numElements,
           }
         }
 
-        for (int qx = 0; qx < NUM_QUAD_1D; ++qx; inner) {
+        for (int qx = 0; qx < NUM_MAX_1D; ++qx; inner) {
           if (qx < NUM_QUAD_1D) {
             for (int dy = 0; dy < NUM_DOFS_1D; ++dy) {
               s_xy(dy, qx) = 0;
@@ -180,7 +180,7 @@ kernel void MultAdd2D(const int numElements,
             }
           }
         }
-        for (int dx = 0; dx < NUM_DOFS_1D; ++dx; inner) {
+        for (int dx = 0; dx < NUM_MAX_1D; ++dx; inner) {
           if (dx < NUM_DOFS_1D) {
             for (int dy = 0; dy < NUM_DOFS_1D; ++dy) {
               double s = 0;
