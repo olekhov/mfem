@@ -218,10 +218,10 @@ namespace mfem {
 
     occa::kernel assembleKernel, multKernel;
 
-    occa::array<double> jacobian, assembledOperator;
+    OccaVector assembledOperator;
 
   public:
-    OccaDiffusionIntegrator(const OccaCoefficient &coeff_);
+    OccaDiffusionIntegrator(const OccaCoefficient &coeff_ = 1.0);
     virtual ~OccaDiffusionIntegrator();
 
     virtual std::string GetName();
@@ -242,10 +242,10 @@ namespace mfem {
 
     occa::kernel assembleKernel, multKernel;
 
-    occa::array<double> jacobian, assembledOperator;
+    OccaVector assembledOperator;
 
   public:
-    OccaMassIntegrator(const OccaCoefficient &coeff_);
+    OccaMassIntegrator(const OccaCoefficient &coeff_ = 1.0);
     virtual ~OccaMassIntegrator();
 
     virtual std::string GetName();
@@ -255,6 +255,7 @@ namespace mfem {
     virtual void Setup();
 
     virtual void Assemble();
+    void SetOperator(OccaVector &v);
 
     virtual void MultAdd(OccaVector &x, OccaVector &y);
   };
@@ -267,10 +268,10 @@ namespace mfem {
 
     occa::kernel assembleKernel, multKernel;
 
-    occa::array<double> jacobian, assembledOperator;
+    OccaVector assembledOperator;
 
   public:
-    OccaVectorMassIntegrator(const OccaCoefficient &coeff_);
+    OccaVectorMassIntegrator(const OccaCoefficient &coeff_ = 1.0);
     virtual ~OccaVectorMassIntegrator();
 
     virtual std::string GetName();

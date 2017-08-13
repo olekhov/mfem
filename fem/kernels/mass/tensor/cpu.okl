@@ -103,7 +103,6 @@ kernel void MultAdd2D(const int numElements,
           sol_x[qy] = 0;
         }
 
-        // sol_x{dx, qy} = dofToQuad{qy, dy} * sol{dx, dy}
         for (int dx = 0; dx < NUM_DOFS_1D; ++dx) {
           const double s = solIn(dx, dy, e);
           for (int qy = 0; qy < NUM_QUAD_1D; ++qy) {
@@ -111,7 +110,6 @@ kernel void MultAdd2D(const int numElements,
           }
         }
 
-        // sol_xy{qx, qy} = dofToQuad{qx, dx} * sol_x{dx, qy}
         for (int qy = 0; qy < NUM_QUAD_1D; ++qy) {
           const double d2q = dofToQuad(qy, dy);
           for (int qx = 0; qx < NUM_QUAD_1D; ++qx) {
@@ -120,7 +118,6 @@ kernel void MultAdd2D(const int numElements,
         }
       }
 
-      // sol_xy{qx, qy} = sol_xy{q} *= oper{q, e}
       for (int qy = 0; qy < NUM_QUAD_1D; ++qy) {
         for (int qx = 0; qx < NUM_QUAD_1D; ++qx) {
           sol_xy[qy][qx] *= oper(qx, qy, e);
@@ -133,7 +130,6 @@ kernel void MultAdd2D(const int numElements,
           sol_x[dx] = 0;
         }
 
-        // sol_x{qx, dy} = quadToDof{dy, qy} * sol_xy{qx, qy}
         for (int qx = 0; qx < NUM_QUAD_1D; ++qx) {
           const double s = sol_xy[qy][qx];
           for (int dx = 0; dx < NUM_DOFS_1D; ++dx) {
@@ -141,7 +137,6 @@ kernel void MultAdd2D(const int numElements,
           }
         }
 
-        // sol{dx, dy, e} = quadToDof{dx, qx} * sol_x{qx, dy}
         for (int dy = 0; dy < NUM_DOFS_1D; ++dy) {
           const double q2d = quadToDof(dy, qy);
           for (int dx = 0; dx < NUM_DOFS_1D; ++dx) {
@@ -209,7 +204,6 @@ kernel void MultAdd3D(const int numElements,
             sol_x[qx] = 0;
           }
 
-          // sol_x{qx} = dofToQuad{qx, dx} * sol{dx, dy, dz, e}
           for (int dx = 0; dx < NUM_DOFS_1D; ++dx) {
             const double s = solIn(dx, dy, dz, e);
             for (int qx = 0; qx < NUM_QUAD_1D; ++qx) {
@@ -217,7 +211,6 @@ kernel void MultAdd3D(const int numElements,
             }
           }
 
-          // sol_xy{qx, qy} = dofToQuad{qy, dy} * sol_x{dx}
           for (int qy = 0; qy < NUM_QUAD_1D; ++qy) {
             const double wy = dofToQuad(qy, dy);
             for (int qx = 0; qx < NUM_QUAD_1D; ++qx) {
@@ -236,7 +229,6 @@ kernel void MultAdd3D(const int numElements,
         }
       }
 
-      // sol_xyz{qz, qy, qx} *= oper{q, e}
       for (int qz = 0; qz < NUM_QUAD_1D; ++qz) {
         for (int qy = 0; qy < NUM_QUAD_1D; ++qy) {
           for (int qx = 0; qx < NUM_QUAD_1D; ++qx) {
@@ -259,7 +251,6 @@ kernel void MultAdd3D(const int numElements,
             sol_x[dx] = 0;
           }
 
-          // sol_x{dx} = quadToDof{dx, qx} * sol_xyz{qz, qy, qx}
           for (int qx = 0; qx < NUM_QUAD_1D; ++qx) {
             const double s = sol_xyz[qz][qy][qx];
             for (int dx = 0; dx < NUM_DOFS_1D; ++dx) {
@@ -267,7 +258,6 @@ kernel void MultAdd3D(const int numElements,
             }
           }
 
-          // sol_xy{dy, dx} = quadToDof{dy, qy} * sol_x{dx}
           for (int dy = 0; dy < NUM_DOFS_1D; ++dy) {
             const double wy = quadToDof(dy, qy);
             for (int dx = 0; dx < NUM_DOFS_1D; ++dx) {

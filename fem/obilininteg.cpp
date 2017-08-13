@@ -647,20 +647,6 @@ namespace mfem {
   void OccaDiffusionIntegrator::Setup() {
     occa::properties kernelProps = props;
 
-    const FiniteElement &fe = *(trialFESpace->GetFE(0));
-
-    const int dims = fe.GetDim();
-    const int symmDims = (dims * (dims + 1)) / 2; // 1x1: 1, 2x2: 3, 3x3: 6
-
-    const int elements = trialFESpace->GetNE();
-    const int quadraturePoints = ir->GetNPoints();
-
-    assembledOperator.allocate(symmDims, quadraturePoints, elements);
-    assembledOperator.stopManaging();
-
-    OccaGeometry geom = GetGeometry(OccaGeometry::Jacobian);
-    jacobian = geom.J;
-
     coeff.Setup(*this, kernelProps);
 
     // Setup assemble and mult kernels
@@ -669,9 +655,22 @@ namespace mfem {
   }
 
   void OccaDiffusionIntegrator::Assemble() {
+    const FiniteElement &fe = *(trialFESpace->GetFE(0));
+
+    const int dims = fe.GetDim();
+    const int symmDims = (dims * (dims + 1)) / 2; // 1x1: 1, 2x2: 3, 3x3: 6
+
+    const int elements = trialFESpace->GetNE();
+    const int quadraturePoints = ir->GetNPoints();
+
+    OccaGeometry geom = GetGeometry(OccaGeometry::Jacobian);
+
+    assembledOperator.SetSize(device,
+                              symmDims * quadraturePoints * elements);
+
     assembleKernel((int) mesh->GetNE(),
                    maps.quadWeights,
-                   jacobian,
+                   geom.J,
                    coeff,
                    assembledOperator);
   }
@@ -708,15 +707,6 @@ namespace mfem {
   void OccaMassIntegrator::Setup() {
     occa::properties kernelProps = props;
 
-    const int elements = trialFESpace->GetNE();
-    const int quadraturePoints = ir->GetNPoints();
-
-    assembledOperator.allocate(quadraturePoints, elements);
-    assembledOperator.stopManaging();
-
-    OccaGeometry geom = GetGeometry(OccaGeometry::Jacobian);
-    jacobian = geom.J;
-
     coeff.Setup(*this, kernelProps);
 
     // Setup assemble and mult kernels
@@ -725,11 +715,27 @@ namespace mfem {
   }
 
   void OccaMassIntegrator::Assemble() {
+    if (assembledOperator.Size()) {
+      return;
+    }
+
+    const int elements = trialFESpace->GetNE();
+    const int quadraturePoints = ir->GetNPoints();
+
+    OccaGeometry geom = GetGeometry(OccaGeometry::Jacobian);
+
+    assembledOperator.SetSize(device,
+                              quadraturePoints * elements);
+
     assembleKernel((int) mesh->GetNE(),
                    maps.quadWeights,
-                   jacobian,
+                   geom.J,
                    coeff,
                    assembledOperator);
+  }
+
+  void OccaMassIntegrator::SetOperator(OccaVector &v) {
+    assembledOperator = v;
   }
 
   void OccaMassIntegrator::MultAdd(OccaVector &x, OccaVector &y) {
@@ -764,15 +770,6 @@ namespace mfem {
   void OccaVectorMassIntegrator::Setup() {
     occa::properties kernelProps = props;
 
-    const int elements = trialFESpace->GetNE();
-    const int quadraturePoints = ir->GetNPoints();
-
-    assembledOperator.allocate(quadraturePoints, elements);
-    assembledOperator.stopManaging();
-
-    OccaGeometry geom = GetGeometry(OccaGeometry::Jacobian);
-    jacobian = geom.J;
-
     coeff.Setup(*this, kernelProps);
 
     // Setup assemble and mult kernels
@@ -781,9 +778,17 @@ namespace mfem {
   }
 
   void OccaVectorMassIntegrator::Assemble() {
+    const int elements = trialFESpace->GetNE();
+    const int quadraturePoints = ir->GetNPoints();
+
+    OccaGeometry geom = GetGeometry(OccaGeometry::Jacobian);
+
+    assembledOperator.SetSize(device,
+                              quadraturePoints * elements);
+
     assembleKernel((int) mesh->GetNE(),
                    maps.quadWeights,
-                   jacobian,
+                   geom.J,
                    coeff,
                    assembledOperator);
   }
