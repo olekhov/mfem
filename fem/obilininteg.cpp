@@ -523,7 +523,9 @@ namespace mfem {
   }
 
   //---[ Base Integrator ]--------------
-  OccaIntegrator::OccaIntegrator() {}
+  OccaIntegrator::OccaIntegrator() :
+    ir(NULL) {}
+
   OccaIntegrator::~OccaIntegrator() {}
 
   void OccaIntegrator::SetupMaps() {
@@ -629,6 +631,7 @@ namespace mfem {
 
   //---[ Diffusion Integrator ]---------
   OccaDiffusionIntegrator::OccaDiffusionIntegrator(const OccaCoefficient &coeff_) :
+    OccaIntegrator(),
     coeff(coeff_) {
     coeff.SetName("COEFF");
   }
@@ -689,6 +692,7 @@ namespace mfem {
 
   //---[ Mass Integrator ]--------------
   OccaMassIntegrator::OccaMassIntegrator(const OccaCoefficient &coeff_) :
+    OccaIntegrator(),
     coeff(coeff_) {
     coeff.SetName("COEFF");
   }
@@ -752,6 +756,7 @@ namespace mfem {
 
   //---[ Vector Mass Integrator ]--------------
   OccaVectorMassIntegrator::OccaVectorMassIntegrator(const OccaCoefficient &coeff_) :
+    OccaIntegrator(),
     coeff(coeff_) {
     coeff.SetName("COEFF");
   }
