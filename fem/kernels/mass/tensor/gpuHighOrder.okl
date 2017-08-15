@@ -156,8 +156,6 @@ kernel void MultAdd2D(const int numElements,
               for (int dx = 0; dx < NUM_DOFS_1D; ++dx) {
                 s += s_xy(dx, qy) * s_dofToQuad(qx, dx);
               }
-
-              const int q = QUAD_2D_ID(qx, qy);
               s_xy2(qx, qy) = s * oper(qx, qy, e);
             }
           }
