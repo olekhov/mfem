@@ -71,40 +71,51 @@ namespace mfem {
                                 const bool transpose = false);
 
     static OccaDofQuadMaps& Get(occa::device device,
+                                const FiniteElement &fe,
+                                const IntegrationRule &ir,
+                                const bool transpose = false);
+
+    static OccaDofQuadMaps& Get(occa::device device,
                                 const OccaFiniteElementSpace &trialFESpace,
                                 const OccaFiniteElementSpace &testFESpace,
                                 const IntegrationRule &ir,
                                 const bool transpose = false);
 
+    static OccaDofQuadMaps& Get(occa::device device,
+                                const FiniteElement &trialFE,
+                                const FiniteElement &testFE,
+                                const IntegrationRule &ir,
+                                const bool transpose = false);
+
     static OccaDofQuadMaps& GetTensorMaps(occa::device device,
-                                          const OccaFiniteElementSpace &fespace,
+                                          const FiniteElement &fe,
                                           const IntegrationRule &ir,
                                           const bool transpose = false);
 
     static OccaDofQuadMaps& GetTensorMaps(occa::device device,
-                                          const OccaFiniteElementSpace &trialFESpace,
-                                          const OccaFiniteElementSpace &testFESpace,
+                                          const FiniteElement &trialFE,
+                                          const FiniteElement &testFE,
                                           const IntegrationRule &ir,
                                           const bool transpose = false);
 
     static OccaDofQuadMaps GetD2QTensorMaps(occa::device device,
-                                            const OccaFiniteElementSpace &fespace,
+                                            const FiniteElement &fe,
                                             const IntegrationRule &ir,
                                             const bool transpose = false);
 
     static OccaDofQuadMaps& GetSimplexMaps(occa::device device,
-                                           const OccaFiniteElementSpace &fespace,
+                                           const FiniteElement &fe,
                                            const IntegrationRule &ir,
                                            const bool transpose = false);
 
     static OccaDofQuadMaps& GetSimplexMaps(occa::device device,
-                                           const OccaFiniteElementSpace &trialFESpace,
-                                           const OccaFiniteElementSpace &testFESpace,
+                                           const FiniteElement &trialFE,
+                                           const FiniteElement &testFE,
                                            const IntegrationRule &ir,
                                            const bool transpose = false);
 
     static OccaDofQuadMaps GetD2QSimplexMaps(occa::device device,
-                                             const OccaFiniteElementSpace &fespace,
+                                             const FiniteElement &fe,
                                              const IntegrationRule &ir,
                                              const bool transpose = false);
   };
