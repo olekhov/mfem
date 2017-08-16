@@ -535,8 +535,8 @@ namespace mfem {
                                 *ir);
 
     mapsTranspose = OccaDofQuadMaps::Get(device,
-                                         *otrialFESpace,
                                          *otestFESpace,
+                                         *otrialFESpace,
                                          *ir);
   }
 
