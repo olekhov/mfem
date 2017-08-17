@@ -15,42 +15,52 @@
   ================================================
 */
 
-kernel void GlobalToLocal(const int entries,
+#if VDIM_ORDERING == ORDERING_BY_VDIM
+typedef double *Global_t @dim(NUM_VDIM, globalEntries);
+typedef double *Local_t  @dim(NUM_VDIM, localEntries);
+#else
+typedef double *Global_t @(dim(NUM_VDIM, globalEntries), idxOrder(1, 0));
+typedef double *Local_t  @(dim(NUM_VDIM, localEntries), idxOrder(1, 0));
+#endif
+
+kernel void GlobalToLocal(const int globalEntries,
+                          const int localEntries,
                           const int * restrict offsets,
                           const int * restrict indices,
-                          const double * restrict globalX,
-                          double * restrict localX) {
+                          const Global_t restrict globalX,
+                          Local_t restrict localX) {
 
-  for (int i = 0; i < entries; ++i; tile(TILESIZE)) {
-    if (i < entries) {
+  for (int i = 0; i < globalEntries; ++i; tile(TILESIZE)) {
+    if (i < globalEntries) {
       const int offset = offsets[i];
       const int nextOffset = offsets[i + 1];
       for (int v = 0; v < NUM_VDIM; ++v) {
-        const double dofValue = globalX[v + i*NUM_VDIM];
+        const double dofValue = globalX(v, i);
         for (int j = offset; j < nextOffset; ++j) {
-          localX[v + indices[j]*NUM_VDIM] = dofValue;
+          localX(v, indices[j]) = dofValue;
         }
       }
     }
   }
 }
 
-kernel void LocalToGlobal(const int entries,
+kernel void LocalToGlobal(const int globalEntries,
+                          const int localEntries,
                           const int * restrict offsets,
                           const int * restrict indices,
-                          const double * restrict localX,
-                          double * restrict globalX) {
+                          const Local_t restrict localX,
+                          Global_t restrict globalX) {
 
-  for (int i = 0; i < entries; ++i; tile(TILESIZE)) {
-    if (i < entries) {
+  for (int i = 0; i < globalEntries; ++i; tile(TILESIZE)) {
+    if (i < globalEntries) {
       const int offset = offsets[i];
       const int nextOffset = offsets[i + 1];
       for (int v = 0; v < NUM_VDIM; ++v) {
         double dofValue = 0;
         for (int j = offset; j < nextOffset; ++j) {
-          dofValue += localX[v + indices[j]*NUM_VDIM];
+          dofValue += localX(v, indices[j]);
         }
-        globalX[v + i*NUM_VDIM] = dofValue;
+        globalX(v, i) = dofValue;
       }
     }
   }

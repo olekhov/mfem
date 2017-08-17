@@ -32,6 +32,8 @@ namespace mfem {
     occa::array<int> localToGlobalMap;
     occa::kernel globalToLocalKernel, localToGlobalKernel;
 
+    Ordering::Type ordering;
+
     int globalDofs, localDofs;
     int vdim;
 
@@ -40,19 +42,32 @@ namespace mfem {
   public:
     OccaFiniteElementSpace(Mesh *mesh,
                            const FiniteElementCollection *fec,
-                           const int vdim_ = 1);
+                           Ordering::Type ordering_);
 
     OccaFiniteElementSpace(occa::device device_,
                            Mesh *mesh,
                            const FiniteElementCollection *fec,
-                           const int vdim_ = 1);
+                           Ordering::Type ordering_);
+
+    OccaFiniteElementSpace(Mesh *mesh,
+                           const FiniteElementCollection *fec,
+                           const int vdim_ = 1,
+                           Ordering::Type ordering_ = Ordering::byVDIM);
+
+
+    OccaFiniteElementSpace(occa::device device_,
+                           Mesh *mesh,
+                           const FiniteElementCollection *fec,
+                           const int vdim_ = 1,
+                           Ordering::Type ordering_ = Ordering::byVDIM);
 
     ~OccaFiniteElementSpace();
 
     void Init(occa::device device_,
               Mesh *mesh,
               const FiniteElementCollection *fec,
-              const int vdim_);
+              const int vdim_,
+              Ordering::Type ordering_ = Ordering::byVDIM);
 
     void SetupLocalGlobalMaps();
     void SetupOperators();
@@ -68,6 +83,8 @@ namespace mfem {
 
     bool isDistributed() const;
     bool hasTensorBasis() const;
+
+    Ordering::Type GetOrdering() const;
 
     int GetGlobalDofs() const;
     int GetLocalDofs() const;

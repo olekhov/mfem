@@ -20,15 +20,30 @@
 namespace mfem {
   OccaFiniteElementSpace::OccaFiniteElementSpace(Mesh *mesh,
                                                  const FiniteElementCollection *fec,
-                                                 const int vdim_) {
-    Init(occa::getDevice(), mesh, fec, vdim_);
+                                                 Ordering::Type ordering_) {
+    Init(occa::getDevice(), mesh, fec, 1, ordering_);
   }
 
   OccaFiniteElementSpace::OccaFiniteElementSpace(occa::device device_,
                                                  Mesh *mesh,
                                                  const FiniteElementCollection *fec,
-                                                 const int vdim_) {
-    Init(device_, mesh, fec, vdim_);
+                                                 Ordering::Type ordering_) {
+    Init(device_, mesh, fec, 1, ordering_);
+  }
+
+  OccaFiniteElementSpace::OccaFiniteElementSpace(Mesh *mesh,
+                                                 const FiniteElementCollection *fec,
+                                                 const int vdim_,
+                                                 Ordering::Type ordering_) {
+    Init(occa::getDevice(), mesh, fec, vdim_, ordering_);
+  }
+
+  OccaFiniteElementSpace::OccaFiniteElementSpace(occa::device device_,
+                                                 Mesh *mesh,
+                                                 const FiniteElementCollection *fec,
+                                                 const int vdim_,
+                                                 Ordering::Type ordering_) {
+    Init(device_, mesh, fec, vdim_, ordering_);
   }
 
   OccaFiniteElementSpace::~OccaFiniteElementSpace() {
@@ -42,19 +57,20 @@ namespace mfem {
   void OccaFiniteElementSpace::Init(occa::device device_,
                                     Mesh *mesh,
                                     const FiniteElementCollection *fec,
-                                    const int vdim_) {
-    device = device_;
-
-    vdim = vdim_;
+                                    const int vdim_,
+                                    Ordering::Type ordering_) {
+    device   = device_;
+    vdim     = vdim_;
+    ordering = ordering_;
 
 #ifndef MFEM_USE_MPI
-    fespace = new FiniteElementSpace(mesh, fec, vdim, Ordering::byVDIM);
+    fespace = new FiniteElementSpace(mesh, fec, vdim, ordering);
 #else
     ParMesh *pmesh = dynamic_cast<ParMesh*>(mesh);
     if (pmesh == NULL) {
-      fespace = new FiniteElementSpace(mesh, fec, vdim, Ordering::byVDIM);
+      fespace = new FiniteElementSpace(mesh, fec, vdim, ordering);
     } else {
-      fespace = new ParFiniteElementSpace(pmesh, fec, vdim, Ordering::byVDIM);
+      fespace = new ParFiniteElementSpace(pmesh, fec, vdim, ordering);
     }
 #endif
 
@@ -155,6 +171,10 @@ namespace mfem {
                            "}");
     props["defines/NUM_VDIM"] = vdim;
 
+    props["defines/ORDERING_BY_NODES"] = 0;
+    props["defines/ORDERING_BY_VDIM"]  = 1;
+    props["defines/VDIM_ORDERING"] = (int) (ordering == Ordering::byVDIM);
+
     globalToLocalKernel = device.buildKernel("occa://mfem/fem/fespace.okl",
                                              "GlobalToLocal",
                                              props);
@@ -193,6 +213,10 @@ namespace mfem {
 
   bool OccaFiniteElementSpace::hasTensorBasis() const {
     return dynamic_cast<const TensorBasisElement*>(fespace->GetFE(0));
+  }
+
+  Ordering::Type OccaFiniteElementSpace::GetOrdering() const {
+    return ordering;
   }
 
   int OccaFiniteElementSpace::GetGlobalDofs() const {
@@ -274,6 +298,7 @@ namespace mfem {
   void OccaFiniteElementSpace::GlobalToLocal(const OccaVector &globalVec,
                                              OccaVector &localVec) const {
     globalToLocalKernel(globalDofs,
+                        localDofs * fespace->GetNE(),
                         globalToLocalOffsets,
                         globalToLocalIndices,
                         globalVec, localVec);
@@ -282,8 +307,8 @@ namespace mfem {
   // Aggregate local node values to their respective global dofs
   void OccaFiniteElementSpace::LocalToGlobal(const OccaVector &localVec,
                                              OccaVector &globalVec) const {
-
     localToGlobalKernel(globalDofs,
+                        localDofs * fespace->GetNE(),
                         globalToLocalOffsets,
                         globalToLocalIndices,
                         localVec, globalVec);

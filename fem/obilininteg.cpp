@@ -466,6 +466,15 @@ namespace mfem {
     int testDofsND  = testDofs1D;
     int quadND  = quad1D;
 
+    const bool trialByVDIM = (trialFESpace.GetOrdering() == Ordering::byVDIM);
+    const bool testByVDIM  = (testFESpace.GetOrdering()  == Ordering::byVDIM);
+
+    props["defines/ORDERING_BY_NODES"] = 0;
+    props["defines/ORDERING_BY_VDIM"]  = 1;
+    props["defines/VDIM_ORDERING"]  = (int) trialByVDIM;
+    props["defines/TRIAL_ORDERING"] = (int) trialByVDIM;
+    props["defines/TEST_ORDERING"]  = (int) testByVDIM;
+
     props["defines/USING_TENSOR_OPS"] = 1;
     props["defines/NUM_DOFS"]  = trialDofs;
     props["defines/NUM_QUAD"]  = numQuad;
@@ -523,6 +532,15 @@ namespace mfem {
     const int testDofs  = testFE.GetDof();
     const int numQuad = ir.GetNPoints();
     const int maxDQ   = std::max(std::max(trialDofs, testDofs), numQuad);
+
+    const bool trialByVDIM = (trialFESpace.GetOrdering() == Ordering::byVDIM);
+    const bool testByVDIM  = (testFESpace.GetOrdering()  == Ordering::byVDIM);
+
+    props["defines/ORDERING_BY_NODES"] = 0;
+    props["defines/ORDERING_BY_VDIM"]  = 1;
+    props["defines/VDIM_ORDERING"]  = (int) trialByVDIM;
+    props["defines/TRIAL_ORDERING"] = (int) trialByVDIM;
+    props["defines/TEST_ORDERING"]  = (int) testByVDIM;
 
     props["defines/USING_TENSOR_OPS"] = 0;
     props["defines/NUM_DOFS"]  = trialDofs;
