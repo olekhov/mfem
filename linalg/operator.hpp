@@ -322,6 +322,9 @@ public:
 
    /// Operator application
    virtual void Mult(const TVector &x, TVector &y) const { y = x; }
+
+   /// Operator application
+   virtual void MultTranspose(const TVector &x, TVector &y) const { y = x; }
 };
 
 typedef TIdentityOperator<Vector> IdentityOperator;
