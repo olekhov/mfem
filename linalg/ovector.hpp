@@ -132,10 +132,6 @@ namespace mfem
       return data.operator occa::kernelArg();
     }
 
-    void CopyTo(Vector &v) const;
-
-    void CopyFrom(const Vector &v);
-
     /// Return the inner-product.
     double operator * (const OccaVector &v) const;
 

@@ -35,9 +35,9 @@ namespace mfem {
     if (device.hasSeparateMemorySpace()) {
       Vector &hostX = GetOccaHostVector(0, op.Width());
       Vector &hostY = GetOccaHostVector(1, op.Height());
-      x.CopyTo(hostX);
+      hostX = x;
       op.Mult(hostX, hostY);
-      y.CopyFrom(hostY);
+      y = hostY;
     } else {
       Vector hostX((double*) x.GetData().ptr(), x.Size());
       Vector hostY((double*) y.GetData().ptr(), y.Size());
@@ -51,9 +51,9 @@ namespace mfem {
     if (device.hasSeparateMemorySpace()) {
       Vector &hostX = GetOccaHostVector(1, op.Height());
       Vector &hostY = GetOccaHostVector(0, op.Width());
-      x.CopyTo(hostX);
+      hostX = x;
       op.MultTranspose(hostX, hostY);
-      y.CopyFrom(hostY);
+      y = hostY;
     } else {
       Vector hostX((double*) x.GetData().ptr(), x.Size());
       Vector hostY((double*) y.GetData().ptr(), y.Size());
