@@ -400,6 +400,9 @@ namespace mfem {
   }
 
   int closestMultipleWarpBatch(const int multiple, const int maxSize) {
+    if (multiple > maxSize) {
+      return maxSize;
+    }
     int batch = (32 / multiple);
     int minDiff = 32 - (multiple * batch);
     for (int i = 64; i <= maxSize; i += 32) {
@@ -497,8 +500,8 @@ namespace mfem {
 
     // 1D Defines
     const int m1InnerBatch = 32 * ((quad1D + 31) / 32);
-    props["defines/A1_ELEMENT_BATCH"]       = closestMultipleWarpBatch(quad1D, 2048);
-    props["defines/M1_OUTER_ELEMENT_BATCH"] = closestMultipleWarpBatch(m1InnerBatch, 2048);
+    props["defines/A1_ELEMENT_BATCH"]       = closestMultipleWarpBatch(quad1D, 512);
+    props["defines/M1_OUTER_ELEMENT_BATCH"] = closestMultipleWarpBatch(m1InnerBatch, 512);
     props["defines/M1_INNER_ELEMENT_BATCH"] = m1InnerBatch;
 
     // 2D Defines
@@ -507,8 +510,8 @@ namespace mfem {
     props["defines/M2_ELEMENT_BATCH"] = 32;
 
     // 3D Defines
-    const int a3QuadBatch = closestMultipleWarpBatch(quadND, 2048);
-    props["defines/A3_ELEMENT_BATCH"] = closestMultipleWarpBatch(a3QuadBatch, 2048);
+    const int a3QuadBatch = closestMultipleWarpBatch(quadND, 512);
+    props["defines/A3_ELEMENT_BATCH"] = closestMultipleWarpBatch(a3QuadBatch, 512);
     props["defines/A3_QUAD_BATCH"]    = a3QuadBatch;
   }
 
