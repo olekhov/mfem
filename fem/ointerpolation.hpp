@@ -22,6 +22,7 @@
 namespace mfem {
   // [MISSING] Proper destructors
   void CreateRPOperators(occa::device device,
+                         const int size,
                          const SparseMatrix *R, const Operator *P,
                          Operator *&OccaR, Operator *&OccaP);
 

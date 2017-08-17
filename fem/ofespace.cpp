@@ -143,6 +143,7 @@ namespace mfem {
     const SparseMatrix *R = fespace->GetRestrictionMatrix();
     const Operator *P = fespace->GetProlongationMatrix();
     CreateRPOperators(device,
+                      fespace->GetNDofs(),
                       R, P,
                       restrictionOp,
                       prolongationOp);

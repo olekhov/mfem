@@ -313,15 +313,22 @@ public:
 
 
 /// Identity Operator I: x -> x.
-class IdentityOperator : public Operator
+template <class TVector>
+class TIdentityOperator : public Operator
 {
 public:
    /// Create an identity operator of size @a n.
-   explicit IdentityOperator(int n) : Operator(n) { }
+   explicit TIdentityOperator(int n) : Operator(n) { }
 
    /// Operator application
-   virtual void Mult(const Vector &x, Vector &y) const { y = x; }
+   virtual void Mult(const TVector &x, TVector &y) const { y = x; }
 };
+
+typedef TIdentityOperator<Vector> IdentityOperator;
+
+#ifdef MFEM_USE_OCCA
+typedef TIdentityOperator<OccaVector> OccaIdentityOperator;
+#endif
 
 
 /** @brief The transpose of a given operator. Switches the roles of the methods

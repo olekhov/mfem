@@ -18,10 +18,12 @@
 
 namespace mfem {
   void CreateRPOperators(occa::device device,
+                         const int size,
                          const SparseMatrix *R, const Operator *P,
                          Operator *&OccaR, Operator *&OccaP) {
     if (!P) {
-      OccaR = OccaP = NULL;
+      OccaR = new OccaIdentityOperator(size);
+      OccaP = new OccaIdentityOperator(size);
       return;
     }
 
